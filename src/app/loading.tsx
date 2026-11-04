@@ -1,0 +1,3 @@
+export default function Loading() {
+  return <div aria-label="Loading workspace" aria-busy="true" className="bos-loading-layout"><span className="sr-only">Bringing your workspace into view.</span><div className="bos-loading-heading"><div className="bos-skeleton"/><div className="bos-skeleton"/></div><div className="bos-loading"><div className="bos-skeleton"/><div className="bos-skeleton"/><div className="bos-skeleton"/></div><div className="bos-loading-collection">{[0,1,2,3].map(row=><div key={row}><span className="bos-skeleton"/><span className="bos-skeleton"/><span className="bos-skeleton"/></div>)}</div></div>;
+}
