@@ -1,7 +1,7 @@
 import { chromium, expect } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 
-const base = process.env.BUSINESSOS_URL || "http://127.0.0.1:3002";
+const base = process.env.BUSINESSOS_URL || "http://localhost:3002";
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 const errors = [];
 const page = await browser.newPage({viewport:{width:1440,height:1100}});
@@ -9,6 +9,7 @@ page.on("pageerror",error=>errors.push(error.message));
 page.on("console",message=>{if(message.type()==="error") errors.push(`${message.text()} ${message.location().url}`);});
 try {
   await page.goto(base, {waitUntil:"networkidle"});
+  await page.locator("[data-executive-ready=true]").waitFor({state:"attached"});
   await expect(page.locator("h1")).toHaveText("Everything, in sync.");
   await page.evaluate(() => document.fonts.ready);
   const brutelLoaded = await page.evaluate(() => {
@@ -45,9 +46,6 @@ try {
   await expect(page.locator(".bos-kpi").filter({hasText:"Monthly revenue"})).toContainText("$46,000");
   await page.getByLabel("Financial reporting month").selectOption("2026-10");
   const pendingValue = () => page.locator(".bos-delivery-value [aria-hidden=true]");
-  await page.getByRole("button",{name:"Monthly figures",exact:true}).click();
-  await expect(page.getByRole("table",{name:"Six months of revenue and expenses, USD"})).toBeVisible();
-  await page.getByRole("button",{name:"Monthly figures",exact:true}).click();
   await page.keyboard.press("ControlOrMeta+k");
   await expect(page.getByRole("textbox",{name:"Search workspace records"})).toBeFocused();
   await page.keyboard.press("Escape");
@@ -58,7 +56,7 @@ try {
   await page.getByLabel("Owner",{exact:true}).fill("Alex Morgan");
   await page.getByRole("button",{name:"Create task",exact:true}).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  await expect(page.locator(".bos-activity-timeline")).toContainText("QA delivery review");
+  await expect(page.locator(".exec-device-activity")).toContainText("QA delivery review");
   await expect(pendingValue()).toHaveText(String(before+1));
   await page.reload({waitUntil:"networkidle"});
   await expect(pendingValue()).toHaveText(String(before+1));

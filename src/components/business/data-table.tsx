@@ -5,6 +5,7 @@ import { flexRender, useTable, tableFeatures, columnFilteringFeature, globalFilt
 import { ArrowDownUp, Check, ChevronLeft, ChevronRight, FileText, FolderKanban, Layers3, ListFilter, Search, X } from "lucide-react";
 import { money, type BusinessRecord } from "@/lib/models";
 import { useWorkspace } from "./workspace-provider";
+import Link from "next/link";
 import { Avatar, StatusBadge } from "./primitives";
 import { Button } from "../ui/button";
 
@@ -17,12 +18,12 @@ export function DataTable({ records, title = "Workspace records" }: { records: B
   const { complete } = useWorkspace();
   const columns: ColumnDef<typeof features, BusinessRecord>[] = [
     { id: "select", header: ({ table }) => <input type="checkbox" aria-label="Select current page" checked={table.getIsAllPageRowsSelected()} onChange={table.getToggleAllPageRowsSelectedHandler()} />, cell: ({ row }) => <input type="checkbox" aria-label={`Select ${row.original.title}`} checked={row.getIsSelected()} onChange={row.getToggleSelectedHandler()} /> },
-    { accessorKey: "title", header: "Name", cell: ({ row }) => <div className="bos-table-record"><span className={`bos-table-record-icon record-${row.original.kind}`}>{row.original.kind === "project" ? <FolderKanban size={18} strokeWidth={1.4} /> : <FileText size={18} strokeWidth={1.4} />}</span><div><strong>{row.original.title}</strong><span>{row.original.kind} <i /> Workspace record</span></div></div> },
+    { accessorKey: "title", header: "Name", cell: ({ row }) => <div className="bos-table-record"><span className={`bos-table-record-icon record-${row.original.kind}`}>{row.original.kind === "project" ? <FolderKanban size={18} strokeWidth={1.4} /> : <FileText size={18} strokeWidth={1.4} />}</span><div><Link href={row.original.kind === "project" ? `/projects/${encodeURIComponent(row.original.id)}` : row.original.kind === "employee" ? `/hrms/${encodeURIComponent(row.original.id)}` : `?record=${encodeURIComponent(row.original.id)}`} scroll={false}>{row.original.title}</Link><span>{row.original.kind} <i /> Workspace record</span></div></div> },
     { accessorKey: "owner", header: "Owner", cell: ({ row }) => <span className="bos-table-owner"><Avatar name={row.original.owner} small />{row.original.owner}</span> },
     { accessorKey: "status", header: "Status", cell: ({ row }) => <StatusBadge status={row.original.status} /> },
     { accessorKey: "date", header: "Date", cell: ({ row }) => <span className="bos-table-date">{new Date(`${row.original.date}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}</span> },
     { accessorKey: "amount", header: "Amount (USD)", cell: ({ row }) => <span className="bos-table-amount">{row.original.amount ? money(row.original.amount) : "—"}</span> },
-    { id: "actions", header: "Action", cell: ({ row }) => row.original.kind === "task" ? <Button variant="ghost" onClick={() => complete(row.original.id)}><Check size={14} />{row.original.status === "Completed" ? "Reopen" : "Complete"}</Button> : <span className="bos-table-kind">{row.original.kind}</span> },
+    { id: "actions", header: "Action", cell: ({ row }) => row.original.kind === "task" ? <Button variant="ghost" onClick={() => complete(row.original.id)}><Check size={14} />{row.original.status === "Completed" ? "Reopen" : "Complete"}</Button> : row.original.kind === "employee" ? <Button asChild variant="ghost"><Link href={`?record=${encodeURIComponent(row.original.id)}`} scroll={false}>Edit details</Link></Button> : <span className="bos-table-kind">{row.original.kind}</span> },
   ];
   const data = useMemo(() => records.filter(record => status === "All statuses" || record.status === status), [records, status]);
   const table = useTable({ features, data, columns, state: { sorting, globalFilter: filter }, onSortingChange: setSorting, onGlobalFilterChange: setFilter, getRowId: record => record.id, initialState: { pagination: { pageIndex: 0, pageSize: 8 } }, autoResetPageIndex: true });

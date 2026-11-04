@@ -1,12 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight, CheckSquare2, CircleDashed, Database, FolderKanban, Globe2, Layers3, LockKeyhole, MessageSquare, Plus, Search, Send, Settings2, Sparkles, TrendingUp, Wallet } from "lucide-react";
 import { modules, navigation } from "@/lib/navigation";
 import { money, type BusinessRecord, type RecordKind } from "@/lib/models";
 import { useWorkspace } from "./workspace-provider";
 import { DataTable } from "./data-table";
+import { WorkflowShowcase, ClientPortalShowcase, SandboxShowcase } from "./module-showcases";
+import { ExecutiveFilters } from "./executive-controls";
+import { useExecutive } from "./executive-provider";
+import { useExecutiveScope } from "./executive-controls";
+import { FinancialIntelligence, ProjectPerformance, WorkforceReport, SalesReport, MarketingReport } from "./executive-panels";
+import { ManagementData, GoalsPanel } from "./executive-management";
+import { RecordDeepLink } from "./record-inspector";
 import { EmptyState } from "./primitives";
 import { Button } from "../ui/button";
 
@@ -56,7 +64,7 @@ function AssistantWorkspace({ records }: { records: BusinessRecord[] }) {
 }
 
 function WorkspaceSettings() {
-  return <div className="bos-settings-grid"><section className="bos-settings-profile"><span className="bos-settings-workspace-mark">N<ArrowUpRight size={18} /></span><span className="bos-panel-index">YOUR WORKSPACE</span><h2>Studio North</h2><p>A connected space for your people,<br />projects, and next possibilities.</p><span className="bos-environment-pill"><span className="bos-label-dot" />Browser-local demonstration</span><div className="bos-settings-profile-footer"><Layers3 size={15} />BusinessOS · Agency workspace</div></section>
+  return <div className="bos-settings-grid"><section className="bos-settings-profile"><span className="bos-settings-workspace-mark">N<ArrowUpRight size={18} /></span><span className="bos-panel-index">YOUR WORKSPACE</span><h2>Studio North</h2><p>A connected space for your people,<br />projects, and next possibilities.</p><span className="bos-environment-pill"><span className="bos-label-dot" />Browser-local demonstration</span><div className="bos-settings-profile-footer"><Layers3 size={15} />Techgy Link · Agency workspace</div></section>
     <section className="bos-card bos-settings"><header className="bos-settings-heading"><span className="bos-node-glyph"><Settings2 size={20} /></span><div><span className="bos-panel-index">THE FOUNDATIONS</span><h2>Workspace information</h2></div></header><dl><dt>Organization</dt><dd>Studio North · sample agency</dd><dt>Currency</dt><dd>USD · US dollar</dd><dt>Reporting</dt><dd>Revenue is received payments; expenses are paid outflows. Net cash movement is revenue less expenses.</dd><dt>Typography</dt><dd>Brutel, loaded from the supplied local font assets. Inter remains a fallback.</dd><dt>Storage</dt><dd>Demo records are stored in this browser. They are not shared with other devices.</dd></dl></section>
     <section className="bos-settings-integrations"><div className="bos-settings-heading"><span className="bos-node-glyph"><LockKeyhole size={20} /></span><div><span className="bos-panel-index">CONNECTION STATUS</span><h2>A clear view of what’s connected.</h2></div></div><div>{[{ title: "Business data", text: "Sample records and browser storage", status: "Local demo", icon: Database }, { title: "Identity & permissions", text: "Authentication and tenant isolation pending", status: "Not connected", icon: LockKeyhole }, { title: "AI & automation", text: "Provider and execution engine pending", status: "Not connected", icon: Sparkles }].map(item => <div key={item.title}><item.icon size={18} /><span><strong>{item.title}</strong><small>{item.text}</small></span><span className="bos-neutral-pill">{item.status}</span></div>)}</div></section>
   </div>;
@@ -65,14 +73,23 @@ function WorkspaceSettings() {
 export function ModulePage({ slug }: { slug: string }) {
   const module = modules.find(item => item.slug === slug)!;
   const group = navigation.find(group => group.items.some(item => item.slug === slug));
-  const { records, openCreate } = useWorkspace();
+  const { openCreate } = useWorkspace();
+  const { records, prefs } = useExecutiveScope();
+  const { setPrefs } = useExecutive();
+  const [stageFilter,setStageFilter]=useState("All stages");
+
   const [financeView, setFinanceView] = useState<"invoice" | "expense">("invoice");
   const kind = "kind" in module ? module.kind as RecordKind : undefined;
   const selectedKind = slug === "finance" ? financeView : kind;
-  const data = records.filter(record => record.kind === selectedKind);
+  const data = records.filter(record => record.kind === selectedKind && (slug!=="crm"||stageFilter==="All stages"||record.stage===stageFilter));
   const Icon = module.icon;
   return <div className={`bos-module-page module-${slug}`}><Link href="/" className="bos-back-link"><ArrowLeft size={14} />Workspace overview</Link>
     <header className="bos-module-hero"><div className="bos-module-title"><span className="bos-module-symbol"><Icon size={28} strokeWidth={1.3} /></span><div><span className="bos-panel-index">{group?.label.toUpperCase()} <i>/</i> STUDIO NORTH</span><h1>{module.label}</h1><p>{module.description}</p></div></div>{kind && <Button variant="primary" onClick={() => openCreate(selectedKind)}><Plus size={16} />Create {selectedKind}</Button>}</header>
-    {kind ? <><CollectionSummary records={data} kind={selectedKind!} />{slug === "finance" && <div className="bos-tabs" role="group" aria-label="Financial record type">{(["invoice", "expense"] as const).map(type => <Button key={type} aria-pressed={financeView === type} variant={financeView === type ? "primary" : "ghost"} onClick={() => setFinanceView(type)}>{type === "invoice" ? "Received payments" : "Paid expenses"}</Button>)}</div>}<DataTable key={selectedKind} records={data} title={slug === "finance" ? financeView === "invoice" ? "Received payments" : "Paid expenses" : module.label} /></> : slug === "ai-assistant" ? <AssistantWorkspace records={records} /> : slug === "settings" ? <WorkspaceSettings /> : <section className={`bos-planned-module planned-${slug}`}><div className="bos-planned-topline"><span><CircleDashed size={14} />PLANNED WORKSPACE</span><span>PREVIEW</span></div><EmptyState icon={Icon} title={`${module.label} is planned for a later phase`} action={<Button asChild><Link href="/">Return to overview<ArrowRight size={15} /></Link></Button>}>{slug === "workflows" ? "The visual editor and execution engine are not connected. This module will use React Flow when workflow development begins." : slug === "sandbox" ? "This demo does not provide an isolated runtime or publishing controls." : slug === "client-portal" ? "A secure customer workspace requires authenticated client access and tenant-scoped records." : "Campaigns, content scheduling, and integration-backed reporting will be developed in a later phase."}</EmptyState><div className="bos-planned-footer"><Layers3 size={15} />Part of your connected BusinessOS workspace<span>Design preview · functionality pending</span></div></section>}
+    {["finance","projects","hrms","crm","marketing"].includes(slug)&&<><div className="exec-report-period"><label>Reporting month<input type="month" aria-label="Report month" value={prefs.month} onChange={e=>{if(e.target.value)setPrefs({...prefs,month:e.target.value});}}/></label></div><ExecutiveFilters /></>}
+    {slug==="finance"&&<FinancialIntelligence/>}{slug==="projects"&&<ProjectPerformance/>}{slug==="hrms"&&<WorkforceReport/>}{slug==="crm"&&<SalesReport/>}
+    <Suspense fallback={null}><RecordDeepLink/>{slug==="crm"&&<CRMStageSync onChange={setStageFilter}/>}</Suspense>
+    {kind ? <><CollectionSummary records={data} kind={selectedKind!} />{slug === "finance" && <div className="bos-tabs" role="group" aria-label="Financial record type">{(["invoice", "expense"] as const).map(type => <Button key={type} aria-pressed={financeView === type} variant={financeView === type ? "primary" : "ghost"} onClick={() => setFinanceView(type)}>{type === "invoice" ? "Received payments" : "Paid expenses"}</Button>)}</div>}{slug === "crm"&&<label className="exec-report-period">Funnel stage<select aria-label="CRM funnel stage" value={stageFilter} onChange={e=>setStageFilter(e.target.value)}>{["All stages","New Lead","Contacted","Qualified","Proposal Sent","Negotiation","Won","Lost"].map(stage=><option key={stage}>{stage}</option>)}</select></label>}<DataTable key={selectedKind} records={data} title={slug === "finance" ? financeView === "invoice" ? "Received payments" : "Paid expenses" : module.label} /></> : slug === "ai-assistant" ? <AssistantWorkspace records={records} /> : slug === "settings" ? <><WorkspaceSettings /><ManagementData /><GoalsPanel /></> : slug === "marketing" ? <MarketingReport /> : slug === "workflows" ? <WorkflowShowcase /> : slug === "client-portal" ? <ClientPortalShowcase /> : slug === "sandbox" ? <SandboxShowcase /> : <section className={`bos-planned-module planned-${slug}`}><div className="bos-planned-topline"><span><CircleDashed size={14} />PLANNED WORKSPACE</span><span>PREVIEW</span></div><EmptyState icon={Icon} title={`${module.label} is planned for a later phase`} action={<Button asChild><Link href="/">Return to overview<ArrowRight size={15} /></Link></Button>}>{slug === "workflows" ? "The visual editor and execution engine are not connected. This module will use React Flow when workflow development begins." : slug === "sandbox" ? "This demo does not provide an isolated runtime or publishing controls." : slug === "client-portal" ? "A secure customer workspace requires authenticated client access and tenant-scoped records." : "Campaigns, content scheduling, and integration-backed reporting will be developed in a later phase."}</EmptyState><div className="bos-planned-footer"><Layers3 size={15} />Part of your connected Techgy Link workspace<span>Design preview · functionality pending</span></div></section>}
   </div>;
 }
+
+function CRMStageSync({onChange}:{onChange:(value:string)=>void}){const stage=useSearchParams().get("stage");useEffect(()=>onChange(stage||"All stages"),[stage,onChange]);return null;}

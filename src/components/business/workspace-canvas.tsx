@@ -58,7 +58,6 @@ export function WorkspaceCanvas({ records, month }: { records: BusinessRecord[];
     </div>
     <div className="bos-canvas-content">
       <div className="bos-folder-stage">
-        <div className="bos-canvas-orbit" aria-hidden="true"><span /><span /><span /></div>
         <div ref={scene} className="bos-folder-scene" role="group" aria-label="Choose a workspace space" onKeyDown={event => { if (event.key === "ArrowRight" || event.key === "ArrowLeft") { event.preventDefault(); move(event.key === "ArrowRight" ? 1 : -1); } }}>
           {visible.map((space, position) => {
             let offset = (position - currentPosition + visible.length) % visible.length;
@@ -85,6 +84,5 @@ export function WorkspaceCanvas({ records, month }: { records: BusinessRecord[];
         </motion.div></AnimatePresence>
       </aside>
     </div>
-    <div className="bos-canvas-bottomline"><span>One workspace. Every moving part.</span><span>Current records · financials follow selected month</span></div>
   </section>;
 }

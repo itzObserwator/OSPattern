@@ -1,0 +1,169 @@
+/* Techgy brand PDF pp.31–40. Existing electric-blue gradients are preserved. */
+:root {
+  --brand-primary:#0022FF;
+  --brand-hover:#001BCC;
+  --brand-soft:#E6E9FF;
+  --canvas:#F8F9FA;
+  --surface:#FFFFFF;
+  --text-primary:#111625;
+  --text-secondary:#414551;
+  --text-muted:#5C6F8A;
+  --border:#E2E8F0;
+  --control-border:#C0CAD6;
+  --navy:#0F1A34;
+  --font-primary:var(--font-brutel),var(--font-inter),system-ui,sans-serif;
+  --font-interface:var(--font-inter),system-ui,sans-serif;
+  --surface-glow:0 4px 20px #0F1A3405;
+}
+body { background:var(--canvas); color:var(--text-primary); font-family:var(--font-interface); }
+.bos-app { background:var(--canvas); }
+h1,h2,h3,.bos-brand strong,.bos-module-title h1,.bos-folder-cover>strong { font-family:var(--font-primary); font-weight:700; }
+.bos-editorial-header h1,.bos-module-title h1,.bos-system-state h1 { color:var(--text-primary); font-weight:700; }
+.bos-editorial-header h1>span { color:var(--brand-primary); }
+.bos-panel-heading h2,.bos-momentum-heading h2,.bos-pulse-heading h2,.bos-range-heading h2,.bos-delivery-summary .bos-delivery-summary-header h2,.bos-section-toolbar h2,.exec-report-header h2,.bos-collection-heading h2,.bos-settings-heading h2 { color:var(--navy); font-family:var(--font-primary); font-weight:700; }
+.bos-sidebar { background:#FFFFFFED; border-color:var(--border); box-shadow:0 8px 30px #0F1A3405; }
+.bos-brand-copy>strong { color:var(--text-primary); }
+.bos-brand-copy>small { color:var(--text-muted); font-family:var(--font-interface); }
+.bos-workspace-switcher,.bos-sidebar-profile { background:var(--canvas); border-color:var(--border); color:var(--text-primary); }
+.bos-workspace-copy small,.bos-sidebar-profile small,.bos-sidebar-ai small,.bos-nav-group h2 { color:var(--text-muted); }
+.bos-nav-item { font-family:var(--font-interface); color:var(--text-secondary); }
+.bos-nav-item.active { color:#FFFFFF; }
+.bos-nav-item:not(.active):hover { background:var(--brand-soft); color:var(--brand-primary); }
+.bos-sidebar-ai,.bos-topbar-divider { border-color:var(--border); }
+.bos-breadcrumb,.bos-search input,.bos-search-results { color:var(--text-primary); }
+.bos-breadcrumb>span,.bos-breadcrumb>i,.bos-context-date { color:var(--text-muted); }
+.bos-search,.bos-period { background:var(--surface); border-color:var(--border); }
+.bos-button,input,select,textarea { font-family:var(--font-interface); }
+.bos-secondary { background:var(--surface); border-color:var(--border); color:var(--text-primary); }
+.bos-secondary:hover { background:var(--canvas); border-color:#9FACBD; }
+.bos-ghost { color:var(--text-secondary); }
+.bos-ghost:hover { background:var(--brand-soft); color:var(--brand-primary); }
+.bos-primary { background-color:var(--brand-primary); color:#FFFFFF; }
+.bos-editorial-header p,.bos-reporting-note,.bos-section-index,.bos-text-link { color:var(--text-muted); }
+/* Neutral surfaces use platinum white and blueprint gray, rather than blue washes. */
+.bos-range-card.bos-primary-feature,.bos-delivery-feature.bos-delivery-summary,.bos-delivery-summary:hover,.bos-momentum-panel.bos-analytics-panel,.bos-project-health.bos-pulse-panel,.bos-compact-metric,.bos-compact-metric.leads,.bos-priority-panel,.bos-team-panel,.exec-report,.exec-attention,.bos-card,.bos-record-collection,.bos-settings-profile,.bos-settings-integrations,.bos-system-state { background:var(--surface); border-color:var(--border); }
+.bos-range-heading h2 { color:var(--navy); }
+.bos-range-label,.bos-range-months,.bos-momentum-heading p,.bos-pulse-heading p,.bos-delivery-summary-header p,.bos-compact-top>span,.bos-compact-bottom small,.bos-chart-window,.bos-chart-window small,.bos-panel-heading p,.bos-task-copy>span,.bos-priority-footer,.bos-context-date,.exec-scope-note,.exec-report-header p { color:var(--text-muted); font-family:var(--font-interface); }
+.bos-range-months .active { color:var(--brand-primary); }
+.bos-range-plot { color:#99A7FF; }
+.bos-range-boundary { stroke:#7D8DA3; }
+.bos-range-point { border-color:#7D8DA3; background:#FFFFFF; }
+.bos-range-badge { background:var(--brand-primary); color:#FFFFFF; font-family:var(--font-primary); font-weight:600; }
+.exec-cash-headline>strong,.bos-delivery-summary-totals strong,.bos-delivery-summary-totals .bos-delivery-value,.bos-compact-bottom>strong,.bos-momentum-panel .bos-analytics-totals strong,.exec-mini-metrics strong,.exec-financial-summary strong { font-family:var(--font-primary); font-weight:600; }
+.exec-cash-headline>span { color:var(--text-muted); font-family:var(--font-interface); }
+.bos-compact-bottom>strong,.bos-momentum-panel .bos-analytics-totals strong,.bos-delivery-summary-totals strong,.bos-delivery-summary-totals .bos-delivery-value { color:var(--text-primary); }
+.bos-delivery-summary-totals>div+div,.bos-delivery-column+.bos-delivery-column { border-color:var(--border); }
+.bos-delivery-bar { background:var(--brand-primary); color:#FFFFFF; }
+.bos-delivery-bar.muted { background:var(--border); color:var(--navy); }
+.bos-delivery-bar.empty { background:transparent; border-color:#9FACBD; color:var(--text-muted); }
+.bos-delivery-bar>span { font-family:var(--font-interface); }
+.bos-delivery-bar strong { font-family:var(--font-primary); font-weight:600; }
+.bos-feature-arrow,.bos-momentum-heading .bos-panel-link,.bos-pulse-heading>a,.bos-delivery-summary-arrow { background:var(--canvas); border-color:var(--border); color:var(--brand-primary); }
+.bos-momentum-emblem,.bos-pulse-emblem,.bos-delivery-emblem { color:#3F485D; border-color:var(--border); }
+.bos-momentum-mode>div { background:var(--canvas); border-color:var(--border); }
+.bos-momentum-mode button { color:var(--text-secondary); }
+.bos-momentum-mode button[aria-pressed=true] { background:var(--brand-soft); color:var(--brand-primary); }
+.bos-momentum-mode>span,.bos-momentum-statistics,.bos-momentum-months,.bos-momentum-timeline output { color:var(--text-muted); font-family:var(--font-interface); }
+.bos-momentum-statistics,.bos-pulse-legend { border-color:var(--border); }
+.bos-momentum-statistics dd,.bos-momentum-statistics>span>strong { color:var(--navy); font-family:var(--font-primary); font-weight:600; }
+.bos-momentum-chart text,.bos-pulse-ring text { font-family:var(--font-interface); }
+.bos-pulse-ring .bos-pulse-center-value { font-family:var(--font-primary); font-weight:600; }
+.bos-momentum-timeline output strong { color:var(--navy); }
+.bos-pulse-legend>button,.bos-pulse-selection { color:var(--text-muted); font-family:var(--font-interface); }
+.bos-pulse-legend>button[aria-pressed=true],.bos-pulse-selection strong { color:var(--brand-primary); }
+/* Spatial geometry, selected-folder gradient stops, and hover motion remain intact. */
+.bos-spatial-workspace { background-color:var(--canvas); background-image:radial-gradient(circle,#C0CAD680 .8px,transparent .9px); border-color:var(--border); }
+.bos-space-inspector { background:var(--surface); border-color:var(--border); }
+.bos-canvas-label,.bos-canvas-filters button,.bos-canvas-add,.bos-space-inspector .bos-panel-index,.bos-space-inspector p,.bos-canvas-caption,.bos-canvas-pagination { color:var(--text-muted); font-family:var(--font-interface); }
+.bos-canvas-filters { background:var(--surface); border-color:var(--border); }
+.bos-canvas-filters button[aria-pressed=true] { color:var(--brand-primary); background:var(--brand-soft); }
+.bos-space-inspector h2 { color:var(--navy); font-weight:700; }
+.bos-spatial-folder:not(.selected) .bos-folder-cover { color:var(--navy); }
+.bos-folder-cover>strong { font-weight:700; }
+.bos-folder-cover-bottom>span { font-family:var(--font-primary); font-weight:600; }
+.bos-folder-paper>i { background:#CFD1D6; }
+/* Keep white-on-blue legibility on the preserved selected folder. */
+.bos-spatial-folder.selected .bos-folder-cover,.bos-spatial-folder.selected .bos-folder-cover-top { color:#FFFFFF; }
+.bos-priority-list,.bos-priority,.bos-priority-footer,.bos-task-filter,.exec-utilization>div,.exec-mini-metrics>div,.exec-financial-summary>div { border-color:var(--border); }
+.bos-task-copy>strong,.exec-utilization>div>a,.exec-insight-prompts button { font-family:var(--font-primary); }
+.bos-task-copy>strong { color:var(--text-primary); font-weight:600; }
+.bos-task-filter { background:var(--surface); color:var(--text-secondary); }
+.exec-utilization small,.exec-utilization>div>span,.exec-mini-metrics span,.exec-financial-summary span,.exec-financial-summary small { color:var(--text-muted); }
+.exec-capacity-track { background:var(--border); }
+.exec-missing { background:var(--canvas); border-color:var(--border); color:var(--text-muted); }
+.exec-filter-row { background:var(--surface); border-color:var(--border); }
+.exec-filter-row select,.exec-inline-controls select,.exec-form input,.exec-form select,.exec-thresholds input,.exec-report-period input { background:var(--surface); border-color:var(--border); color:var(--text-primary); }
+.exec-filter-row label,.exec-inline-controls label,.exec-form label,.exec-thresholds label { color:var(--text-muted); }
+.exec-rule-insights { background:var(--navy); border:1px solid var(--navy); }
+.exec-rule-insights h2 { font-family:var(--font-primary); font-weight:700; color:#FFFFFF; }
+.exec-rule-insights p,.exec-rule-insights .exec-insight-answer { color:#E2E8F0; font-family:var(--font-interface); }
+.exec-insight-prompts button { background:#FFFFFF08; border-color:#6F7685; color:#FFFFFF; }
+.exec-insight-prompts button[aria-pressed=true] { background:var(--brand-primary); border-color:#667AFF; }
+.exec-rule-badge { background:var(--brand-soft); color:var(--brand-primary); }
+/* Department reports and forms follow the same palette. Vivid blue motifs are excluded. */
+.bos-module-title h1,.bos-settings-profile h2,.bos-collection-heading h2,.bos-settings-heading h2 { color:var(--text-primary); }
+.bos-module-hero,.bos-collection-summary,.bos-table-collection,.bos-table-toolbar,.bos-table-pagination,.bos-dialog,.bos-search-results,.bos-ai-workspace,.bos-assistant-context { background-color:var(--surface); border-color:var(--border); }
+.bos-module-symbol,.bos-summary-icon,.bos-table-record-icon,.bos-node-glyph,.bos-system-glyph { background:var(--canvas); border-color:var(--border); color:var(--navy); }
+.bos-module-title p,.bos-back-link,.bos-collection-heading p,.bos-collection-summary span,.bos-table-toolbar,.bos-table-date,.bos-table-owner,.bos-table-record span,.bos-table-pagination,.bos-form-context,.bos-dialog p,.bos-composer-note { color:var(--text-muted); }
+.bos-data-table th,.exec-table-wrap th { background:var(--canvas); color:var(--text-secondary); font-family:var(--font-interface); }
+.bos-data-table td,.bos-data-table th,.exec-table-wrap,.exec-table-wrap td,.exec-table-wrap th { border-color:var(--border); }
+.bos-data-table tbody tr:hover { background:#F6F8FB; }
+.bos-data-table td,.bos-table-record a,.exec-table-wrap td { color:var(--text-primary); }
+.bos-table-record a { font-family:var(--font-primary); font-weight:600; }
+.bos-data-table .bos-table-amount { color:var(--navy); }
+.bos-dialog h2 { color:var(--navy); font-family:var(--font-primary); font-weight:700; }
+.bos-settings-profile p,.bos-settings-profile-footer,.bos-settings dt,.bos-settings dd { color:var(--text-muted); }
+.bos-content-footer,.bos-action-strip { border-color:var(--border); color:var(--text-muted); }
+.exec-goal-dial { background:conic-gradient(#0022FF var(--achievement),#E6E9FF 0); }
+.exec-goal-dial>strong { background:var(--surface); font-family:var(--font-primary); }
+.bos-skeleton { background-image:linear-gradient(100deg,#E2E8F0,#F8F9FA,#E2E8F0); }
+.bos-collection,.bos-dialog { background:var(--surface); border-color:var(--border); }
+.bos-collection-summary>div { background:var(--surface); border-color:var(--border); }
+.bos-form label { color:var(--navy); font-family:var(--font-interface); }
+.bos-form input,.bos-form select { background:var(--surface); color:var(--text-primary); border-color:var(--control-border); }
+.bos-form input::placeholder { color:var(--text-muted); }
+.bos-form input[aria-invalid=true] { border-color:var(--danger); }
+.bos-form p.bos-form-error { color:var(--danger); }
+.bos-form-emblem,.bos-form-emblem:before { background:var(--canvas); border-color:var(--border); color:var(--navy); }
+.bos-form-emblem>svg:last-child { color:var(--navy); }
+.bos-status-filter { background:var(--surface); border-color:var(--control-border); color:var(--text-muted); }
+.bos-status-filter select { color:var(--text-secondary); }
+.bos-delivery-summary-totals>div>span { color:var(--text-muted); font-family:var(--font-interface); }
+
+/* Consistent inset for dropdown chevrons, including native select controls. */
+select:not([multiple]):not([size]) {
+  appearance:none;
+  -webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23111625' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 14px center;
+  background-size:16px 16px;
+  padding-right:40px;
+}
+.bos-workspace-switcher>svg:last-child { margin-right:6px; }
+@media(forced-colors:active) {
+  select:not([multiple]):not([size]) { appearance:auto; background-image:none; }
+}
+
+/* Expense categories: direct amounts and shares instead of oversized chart bars. */
+.exec-expense-breakdown { margin-top:18px; font-family:var(--font-interface); }
+.exec-expense-total { display:flex; align-items:center; justify-content:space-between; gap:16px; padding-bottom:20px; }
+.exec-expense-total>div>span { display:block; font-size:13px; color:var(--text-muted); }
+.exec-expense-total strong { display:block; margin-top:6px; font-family:var(--font-primary); font-size:30px; line-height:1.2; font-weight:600; color:var(--navy); }
+.exec-expense-count { padding:6px 10px; border-radius:20px; background:var(--canvas); color:var(--text-secondary); font-size:12px; white-space:nowrap; }
+.exec-expense-columns { display:flex; justify-content:space-between; gap:12px; padding:12px 0; border-top:1px solid var(--border); color:var(--text-muted); font-size:12px; }
+.exec-expense-breakdown ul { list-style:none; padding:0; margin:0; }
+.exec-expense-breakdown li { padding:8px 0 16px; }
+.exec-expense-row { display:flex; align-items:baseline; justify-content:space-between; gap:16px; font-size:14px; }
+.exec-expense-row>span { min-width:0; overflow-wrap:anywhere; color:var(--text-primary); }
+.exec-expense-row>div { display:flex; align-items:baseline; gap:12px; flex-shrink:0; }
+.exec-expense-row strong { font-weight:600; color:var(--navy); font-variant-numeric:tabular-nums; }
+.exec-expense-row>div>span { min-width:38px; text-align:right; font-size:13px; color:var(--text-muted); font-variant-numeric:tabular-nums; }
+.exec-expense-track { height:6px; margin-top:12px; background:var(--border); border-radius:6px; overflow:hidden; }
+.exec-expense-track>span { display:block; height:100%; background:var(--brand-primary); border-radius:inherit; }
+.exec-expense-note { margin:4px 0 0; padding:12px 14px; border-radius:12px; background:var(--canvas); color:var(--text-muted); font-size:13px; line-height:1.6; }
+@media(max-width:400px) {
+  .exec-expense-total { align-items:flex-start; flex-wrap:wrap; gap:10px; }
+  .exec-expense-row { flex-direction:column; gap:6px; }
+  .exec-expense-row>div { width:100%; justify-content:space-between; }
+}

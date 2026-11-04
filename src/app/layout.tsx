@@ -6,6 +6,10 @@ import { WorkspaceProvider } from "@/components/business/workspace-provider";
 import "./globals.css";
 import "./spatial.css";
 import "./components.css";
+import "./executive.css";
+import "./techgy-brand.css";
+import "./showcases.css";
+import "./employee-profile.css";
 
 const brutel = localFont({
   src: [
@@ -26,7 +30,7 @@ const brutel = localFont({
 });
 const inter = localFont({ src: "../../public/fonts/inter-ui.woff2", variable: "--font-inter", display: "swap", weight: "100 900", preload: false });
 
-export const metadata: Metadata = {title:{default:"Overview · BusinessOS",template:"%s · BusinessOS"},description:"Your business. One intelligent workspace. BusinessOS demonstration.",icons:{icon:"/icon.svg"}};
+export const metadata: Metadata = {title:{default:"Overview · Techgy Link",template:"%s · Techgy Link"},description:"Your business. One intelligent workspace. Techgy Link demonstration.",icons:{icon:{url:"/techgy-link-logo.png",type:"image/png",sizes:"180x180"},apple:"/techgy-link-logo.png"}};
 export default async function RootLayout({children}: {children: React.ReactNode}) {
   const records = await demoService.getRecords();
   return <html lang="en" className={`${brutel.variable} ${inter.variable}`}><body><WorkspaceProvider initialRecords={records}><AppShell>{children}</AppShell></WorkspaceProvider></body></html>;

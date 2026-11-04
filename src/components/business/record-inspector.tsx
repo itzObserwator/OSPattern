@@ -1,0 +1,46 @@
+"use client";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { recordSchema, money, type BusinessRecord } from "@/lib/models";
+import { projectPerformance, stages } from "@/lib/executive";
+import { useWorkspace } from "./workspace-provider";
+import { departmentOptions } from "@/lib/departments";
+import { availableSampleClients } from "@/lib/record-options";
+import { useExecutive } from "./executive-provider";
+import { currentDay, metric } from "./executive-panels";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "../ui/dialog";
+import { Button } from "../ui/button";
+export function RecordEditor({record}:{record:BusinessRecord}){
+ const {records}=useWorkspace();const {data,saveRecordDetails}=useExecutive();const [message,setMessage]=useState("");
+ const departments=departmentOptions(data.departments,records.flatMap(r=>r.departmentId?[r.departmentId]:[]));
+ const sampleClients=availableSampleClients(data.clients);
+ const clients=[...data.clients,...sampleClients];
+ return <form className="exec-form" key={record.id} onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);try{
+ const optional=(key:string)=>String(f.get(key)||"").trim()||undefined;
+ const num=(key:string)=>optional(key)===undefined?undefined:Number(f.get(key));
+ const chosenStage=record.kind==="lead"?optional("stage") as BusinessRecord["stage"]:record.stage;
+ const stageDate=optional("stageDate")||currentDay();
+ const next=recordSchema.parse({...record,stage:chosenStage,source:record.kind==="lead"?optional("source"):record.source,stageHistory:record.kind==="lead"&&chosenStage&&(!record.stageHistory?.length||chosenStage!==record.stage)?[...(record.stageHistory||[]),{stage:chosenStage,date:stageDate}]:record.stageHistory,closedDate:record.kind==="lead"?(chosenStage==="Won"||chosenStage==="Lost"?(chosenStage===record.stage&&record.closedDate?record.closedDate:stageDate):undefined):record.closedDate,owner:String(f.get("owner")),departmentId:optional("department"),projectId:record.kind==="project"?undefined:optional("project"),clientId:optional("client"),employeeId:record.kind==="task"?optional("employee"):record.employeeId,estimatedHours:record.kind==="task"?num("hours"):record.estimatedHours,weeklyCapacityHours:record.kind==="employee"?num("capacity"):record.weeklyCapacityHours,blocker:record.kind==="task"?f.get("blocker")==="on":record.blocker,followUpDate:record.kind==="lead"?optional("followup"):record.followUpDate});
+ saveRecordDetails(next,{department:departments.find(d=>d.id===next.departmentId),client:clients.find(c=>c.id===next.clientId)});setMessage("Record updated on this device.");
+ }catch(err){setMessage(err instanceof Error?err.message:"Check the record fields.");}}}>
+ <label>Responsible person / team<input name="owner" minLength={2} defaultValue={record.owner} required/></label><label>Department<select name="department" aria-label="Department" defaultValue={record.departmentId||""}><option value="">Not linked</option>{departments.map(d=><option key={d.id} value={d.id}>{d.name}</option>)}</select></label>
+ {record.kind!=="project"&&<label>Linked project<select aria-label="Linked project" name="project" defaultValue={record.projectId||""}><option value="">Not linked</option>{records.filter(r=>r.kind==="project").map(r=><option key={r.id} value={r.id}>{r.title}</option>)}</select></label>}
+ <label>Client<select aria-label="Client" name="client" defaultValue={record.clientId||""}><option value="">Not linked</option>{data.clients.length>0&&<optgroup label="Workspace clients">{data.clients.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</optgroup>}{sampleClients.length>0&&<optgroup label="Sample clients">{sampleClients.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</optgroup>}</select></label>
+ {record.kind==="task"&&<><label>Assigned employee<select aria-label="Assigned employee" name="employee" defaultValue={record.employeeId||""}><option value="">Use owner name</option>{records.filter(r=>r.kind==="employee").map(r=><option key={r.id} value={r.id}>{r.title}</option>)}</select></label><label>Estimated remaining hours this week<input type="number" min="0" step="0.25" name="hours" defaultValue={record.estimatedHours}/></label><label><input type="checkbox" name="blocker" defaultChecked={record.blocker}/>Blocked</label></>}
+ {record.kind==="employee"&&<label>Available capacity per week (hours)<input type="number" min="0.25" step="0.25" name="capacity" defaultValue={record.weeklyCapacityHours}/></label>}
+ {record.kind==="lead"&&<><label>Sales stage<select name="stage" aria-label="Sales stage" defaultValue={record.stage||""}><option value="">Not mapped</option>{stages.map(s=><option key={s}>{s}</option>)}</select></label><label>Stage effective date<input name="stageDate" type="date" min={record.date} defaultValue={record.closedDate||(record.date>currentDay()?record.date:currentDay())}/></label><label>Lead source<select name="source" aria-label="Lead source" defaultValue={record.source||""}><option value="">Not classified</option>{["Instagram","Facebook","Website","Referrals","Direct Enquiries","Other Sources"].map(s=><option key={s}>{s}</option>)}</select></label><label>Next follow-up date<input name="followup" type="date" defaultValue={record.followUpDate}/></label></>}
+ <div className="exec-record-actions"><Button type="submit" variant="primary">Save record details</Button>{record.kind==="employee"&&<Button asChild><Link href={`/hrms/${encodeURIComponent(record.id)}`}>View full profile <ArrowUpRight size={15}/></Link></Button>}</div>{message&&<p role="status">{message}</p>}</form>;
+}
+export function RecordDeepLink(){
+ const path=usePathname();const search=useSearchParams().toString();const {records}=useWorkspace();const {data}=useExecutive();const [id,setId]=useState<string|null>(null);
+ useEffect(()=>{setId(new URLSearchParams(window.location.search).get("record"));},[path,search]);
+ const record=records.find(r=>r.id===id),invoice=data.invoices.find(r=>r.id===id);
+ return <Dialog open={!!id} onOpenChange={open=>{if(!open){setId(null);const url=new URL(window.location.href);url.searchParams.delete("record");window.history.replaceState(null,"",url);}}}><DialogContent className="exec-settings-dialog"><DialogTitle>{record?.title||invoice?.number||"Record details"}</DialogTitle><DialogDescription>Sample record · changes are saved on this device. Review related records before making a management decision.</DialogDescription>{record?<><dl className="exec-detail-list"><dt>Status</dt><dd>{record.status}</dd><dt>Date</dt><dd>{record.date}</dd><dt>Recorded amount</dt><dd>{money(record.amount)}</dd></dl>{record.kind==="project"&&<Link href={`/projects/${encodeURIComponent(record.id)}`}>Project performance <ArrowUpRight size={14}/></Link>}<RecordEditor record={record}/></>:invoice?<dl className="exec-detail-list"><dt>Owner</dt><dd>{invoice.owner}</dd><dt>Due date</dt><dd>{invoice.due}</dd><dt>Issued value</dt><dd>{money(invoice.amount)}</dd><dt>Payments recorded</dt><dd>{money(invoice.payments.reduce((n,p)=>n+p.amount,0))}</dd></dl>:<p>This record is unavailable on this device.</p>}</DialogContent></Dialog>;
+}
+export function ProjectDetail({id}:{id:string}){
+ const {records}=useWorkspace();const {data,prefs}=useExecutive();const p=projectPerformance(records,data,currentDay(),prefs).find(p=>p.project.id===id);
+ if(!p)return <section className="exec-report"><h1>Project unavailable</h1><p>This project is not present in this device’s records.</p><Link href="/projects">Return to projects</Link></section>;
+ return <div className="exec-project-detail"><Link className="bos-back-link" href="/projects"><ArrowLeft size={14}/>All projects</Link><section className="exec-report"><span className="exec-rule-badge">Current sample records · deterministic delivery health</span><h1>{p.project.title}</h1><p>{p.project.owner} · {p.status} · Due {p.project.date}</p><div className="exec-mini-metrics">{[["Client",data.clients.find(c=>c.id===p.project.clientId)?.name||"Not linked"],["Progress",`${p.project.progress}%`],["Approved budget",metric(p.budget)],["Recognized revenue",metric(p.revenue)],["Direct cost",metric(p.direct)],["Allocated indirect cost",metric(p.indirect)],["Estimated profit",metric(p.profit)],["Profit margin",metric(p.margin,true)]].map(([label,value])=><div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div><h3>Assigned team & outstanding work</h3>{p.tasks.length?p.tasks.map(t=><Link className="exec-detail-task" href={`/tasks?record=${encodeURIComponent(t.id)}`} key={t.id}><strong>{t.title}</strong><span>{t.owner} · {t.status} · Due {t.date}</span><ArrowUpRight size={14}/></Link>):<p className="exec-missing">No tasks have an explicit project link. Link tasks through their record details.</p>}<details className="exec-data-help"><summary>Edit ownership & relationships</summary><RecordEditor record={p.project}/></details></section></div>;
+}

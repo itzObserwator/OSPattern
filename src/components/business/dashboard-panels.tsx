@@ -4,7 +4,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, animate, motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, ArrowUpRight, ChartNoAxesColumn, ChartPie, Check, CheckCircle2, ChevronDown, CircleDashed, Clock3, FolderKanban, Plus, Search, Sparkles, TrendingUp, Users } from "lucide-react";
+import { ArrowRight, ArrowUpRight, ChartNoAxesColumn, ChartPie, Check, CheckCircle2, CircleDashed, Clock3, FolderKanban, Plus, Search, Sparkles, TrendingUp, Users } from "lucide-react";
 import { financialSeries, money, type BusinessRecord } from "@/lib/models";
 import { Button } from "../ui/button";
 import { Avatar, StatusBadge } from "./primitives";
@@ -52,33 +52,28 @@ function BrandGeometry({ className = "" }: { className?: string }) {
 
 type Summary = { projects: number; employees: number; revenue: number; expenses: number; tasks: number; leads: number };
 
-export function PrimaryFeatureCard({ month, summary, previous }: { records: BusinessRecord[]; month: string; summary: Summary; previous: Summary }) {
-  const series = ["Mar", "Apr", "May", "Jun", "Jul", "Aug"].map(month => ({ month }));
+export function PrimaryFeatureCard({ records, month, summary, previous }: { records: BusinessRecord[]; month: string; summary: Summary; previous: Summary }) {
+  const series = financialSeries(records, month);
   const patternId = useId().replace(/:/g, "");
-  const [activeIndex, setActiveIndex] = useState(3);
+  const [activeIndex, setActiveIndex] = useState(5);
   const active = series[activeIndex];
-  // Illustrative forecast values reproduce the reference's angular ribbon.
-  // They are explicitly labeled as samples, separate from recorded cash totals.
-  const forecast = [115, 100, 110, 100, 100, 105];
-  const outflow = [90, 65, 75, 52, 78, 78];
-  // Trace the visible six-point ribbon; keep the dashboard card upright.
-  // The range is illustrative; coordinates preserve its six-point silhouette.
+  const forecast = series.map(row => row.revenue);
+  const outflow = series.map(row => row.expenses);
   const x = [0, 120, 232, 339, 447, 570];
-  const upper = [12, 52, 26, 50, 51, 44];
-  const lower = [62, 119, 110, 142, 99, 108];
-  // Narrow the ribbon around its original centerline, retaining its contour.
-  const revenues = upper.map((y, index) => ({ x: x[index], y: (y + lower[index]) / 2 - (lower[index] - y) * .36 }));
-  const expenses = lower.map((y, index) => ({ x: x[index], y: (y + upper[index]) / 2 + (y - upper[index]) * .36 }));
+  const maximum = Math.max(1, ...forecast, ...outflow);
+  const revenues = forecast.map((value,index) => ({x:x[index], y:145-value/maximum*125}));
+  const expenses = outflow.map((value,index) => ({x:x[index], y:145-value/maximum*125}));
   const coordinates = (points: { x: number; y: number }[]) => points.map(p => `${p.x},${p.y}`).join(" ");
   const band = `${coordinates(revenues)} ${coordinates([...expenses].reverse())}`;
-  const margin = (forecast[activeIndex] - outflow[activeIndex]) / forecast[activeIndex] * 100;
+  const margin = forecast[activeIndex] > 0 ? (forecast[activeIndex] - outflow[activeIndex]) / forecast[activeIndex] * 100 : null;
   const change = previous.revenue ? (summary.revenue - previous.revenue) / previous.revenue * 100 : null;
   const monthName = new Date(`${month}-01T12:00:00Z`).toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
   const markerY = (revenues[activeIndex].y + expenses[activeIndex].y) / 2;
   return <section className="bos-primary-feature bos-kpi bos-range-card" aria-label="Monthly financial performance">
     <header className="bos-range-heading"><h2>Financial performance</h2><Link href="/finance" className="bos-feature-arrow" aria-label="View financial records"><ArrowUpRight size={22} /></Link></header>
+    <div className="exec-cash-headline"><strong>{money(summary.revenue)}</strong><span>received · {money(summary.revenue-summary.expenses)} net cash</span></div>
     <div className="bos-range-chart">
-      <span className="bos-range-label">Forecast · sample</span>
+      <span className="bos-range-label">Cash received</span>
       <div className="bos-range-plot">
         <svg viewBox="0 0 570 160" preserveAspectRatio="none" aria-hidden="true">
           <defs>
@@ -92,13 +87,13 @@ export function PrimaryFeatureCard({ month, summary, previous }: { records: Busi
         </svg>
         {[revenues, expenses].map((points, line) => points.map((point, index) => <span key={`${line}-${index}`} className="bos-range-point" aria-hidden="true" style={{ left: `${point.x / 570 * 100}%`, top: `${point.y / 160 * 100}%` }} />))}
         <span className="bos-range-badge" style={{ left: `clamp(24px, ${revenues[activeIndex].x / 570 * 100}%, calc(100% - 24px))`, top: `${markerY / 160 * 100}%` }}>{margin === null ? "—" : `${Math.round(margin)}%`}</span>
-        <div className="bos-range-hitareas">{series.map((row, index) => <button key={row.month} type="button" aria-label={`${row.month}: sample cash retention ${Math.round((forecast[index] - outflow[index]) / forecast[index] * 100)} percent`} aria-pressed={activeIndex === index} onPointerEnter={() => setActiveIndex(index)} onFocus={() => setActiveIndex(index)} onClick={() => setActiveIndex(index)} />)}</div>
+        <div className="bos-range-hitareas">{series.map((row, index) => <button key={row.month} type="button" aria-label={`${row.month}: received ${money(forecast[index])}, paid ${money(outflow[index])}`} aria-pressed={activeIndex === index} onPointerEnter={() => setActiveIndex(index)} onFocus={() => setActiveIndex(index)} onClick={() => setActiveIndex(index)} />)}</div>
       </div>
-      <span className="bos-range-label bos-range-expense-label">Outflow · sample</span>
+      <span className="bos-range-label bos-range-expense-label">Cash paid</span>
       <div className="bos-range-months" aria-hidden="true">{series.map((row, index) => <span key={row.month} className={activeIndex === index ? "active" : ""}>{row.month}</span>)}</div>
     </div>
     <div className="sr-only" aria-live="polite">{active.month} · {margin === null ? "No received revenue" : `${margin.toFixed(1)}% net cash / revenue`}. {monthName}. Monthly revenue {money(summary.revenue)}. Monthly expenses {money(summary.expenses)}. Net cash movement {money(summary.revenue - summary.expenses)}.</div>
-    <span className="sr-only">{change === null ? "No prior-period payments" : `${Math.abs(change).toFixed(1)}% ${change >= 0 ? "up" : "down"} from previous month`}. Chart displays an illustrative forecast range; it does not represent recorded cash transactions. The badge shows the sample percentage retained after outflow.</span>
+    <span className="sr-only">{change === null ? "No prior-period payments" : `${Math.abs(change).toFixed(1)}% ${change >= 0 ? "up" : "down"} from previous month`}. Chart shows six months of paid cash receipts and outflows. The badge is net cash divided by cash receipts, not operating margin.</span>
   </section>;
 }
 
@@ -128,31 +123,26 @@ function PanelHeading({ index, title, subtitle, action }: { index?: string; titl
 }
 
 export function AnalyticsPanel({ records, month }: { records: BusinessRecord[]; month: string }) {
-  const [expanded, setExpanded] = useState(false);
-  const reduced = useReducedMotion();
   const series = financialSeries(records, month);
   const totalRevenue = series.reduce((total, row) => total + row.revenue, 0);
   const totalExpenses = series.reduce((total, row) => total + row.expenses, 0);
   return <section className="bos-analytics-panel bos-momentum-panel">
     <header className="bos-momentum-heading"><span className="bos-momentum-emblem"><TrendingUp size={20} /></span><div><h2>Financial momentum</h2><p>Received payments & paid expenses</p></div><Link href="/finance" className="bos-panel-link" aria-label="View finance report"><ArrowUpRight size={20} /></Link></header>
-    <div className="bos-analytics-totals"><div><span><i className="bos-legend-dot blue" />Revenue</span><strong>{money(totalRevenue)}</strong></div><div><span><i className="bos-legend-square" />Expenses</span><strong>{money(totalExpenses)}</strong></div><span className="bos-chart-window">{series[0].month} — {series[5].month}<small>{month.slice(0, 4)} · 6-month total</small></span></div>
+    <div className="bos-analytics-totals"><div><span><i className="bos-legend-dot blue" />Cash received</span><strong>{money(totalRevenue)}</strong></div><div><span><i className="bos-legend-square" />Cash paid</span><strong>{money(totalExpenses)}</strong></div><span className="bos-chart-window">{series[0].month} — {series[5].month}<small>{month.slice(0, 4)} · 6-month total</small></span></div>
     <FinanceChart records={records} month={month} />
-    <div className="bos-analytics-footer"><span>USD · cash movement, not accounting profit</span><button onClick={() => setExpanded(!expanded)} aria-expanded={expanded} aria-controls="financial-data">Monthly figures <ChevronDown size={14} className={expanded ? "expanded" : ""} /></button></div>
-    <AnimatePresence initial={false}>{expanded && <motion.div id="financial-data" className="bos-financial-data" initial={{ height: reduced ? "auto" : 0, opacity: reduced ? 1 : 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: reduced ? "auto" : 0, opacity: 0 }} transition={{ duration: reduced ? 0 : 0.25 }}><table><caption className="sr-only">Six months of revenue and expenses, USD</caption><thead><tr><th>Month</th><th>Revenue</th><th>Expenses</th></tr></thead><tbody>{series.map(row => <tr key={row.month}><th scope="row">{row.month}</th><td>{money(row.revenue)}</td><td>{money(row.expenses)}</td></tr>)}</tbody></table></motion.div>}</AnimatePresence>
   </section>;
 }
 
 export function ProjectHealthPanel({ projects }: { projects: BusinessRecord[] }) {
-  const average = projects.length ? Math.round(projects.reduce((total, project) => total + project.progress, 0) / projects.length) : 0;
   return <section className="bos-project-health bos-pulse-panel">
     <header className="bos-pulse-heading"><span className="bos-pulse-emblem"><ChartPie size={20} /></span><div><h2>Delivery pulse</h2><p>Active project breakdown</p></div><Link href="/projects" aria-label="View all projects"><ArrowUpRight size={19} /></Link></header>
     <DeliveryPulseChart projects={projects} />
-    <div className="bos-pulse-footer"><span><strong>{projects.length}</strong> {projects.length === 1 ? "active project" : "active projects"}</span><span><strong>{average}%</strong> average progress</span></div>
   </section>;
 }
 
-export function PriorityTaskList() {
-  const { records, complete, openCreate } = useWorkspace();
+export function PriorityTaskList({ scopedRecords }: { scopedRecords?: BusinessRecord[] }) {
+  const { records: allRecords, complete, openCreate } = useWorkspace();
+  const records = scopedRecords ?? allRecords;
   const [filter, setFilter] = useState("Open");
   const tasks = records.filter(record => record.kind === "task" && (filter === "All tasks" || record.status !== "Completed")).slice(0, 4);
   return <section className="bos-priority-panel"><PanelHeading title="A little focus goes a long way." subtitle="Your priority tasks" action={<select className="bos-task-filter" aria-label="Filter priority tasks" value={filter} onChange={event => setFilter(event.target.value)}><option>Open</option><option>All tasks</option></select>} />
@@ -169,7 +159,7 @@ export function TeamWorkload({ tasks, employees }: { tasks: BusinessRecord[]; em
 
 export function UpcomingMilestones({ projects, today }: { projects: BusinessRecord[]; today: string }) {
   const upcoming = [...projects].filter(project => project.date >= today).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3);
-  return <section className="bos-milestone-panel"><PanelHeading index="ON THE HORIZON" title="What’s coming into view" action={<Link href="/projects" className="bos-text-link">Projects <ArrowUpRight size={15} /></Link>} /><div className="bos-milestone-list">{upcoming.map(project => <Link href="/projects" className="bos-milestone" key={project.id}><span className="bos-milestone-date"><strong>{project.date.slice(-2)}</strong><span>{new Date(`${project.date}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" })}</span></span><div><strong>{project.title}</strong><span>Delivery · {project.owner}</span></div><ArrowUpRight size={17} /></Link>)}</div>{!upcoming.length && <p className="bos-panel-empty">No upcoming project delivery dates.</p>}</section>;
+  return <section className="bos-milestone-panel"><PanelHeading title="What’s coming into view" /><div className="bos-milestone-list">{upcoming.map(project => <Link href="/projects" className="bos-milestone" key={project.id}><span className="bos-milestone-date"><strong>{project.date.slice(-2)}</strong><span>{new Date(`${project.date}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", timeZone: "UTC" })}</span></span><div><strong>{project.title}</strong><span>Delivery · {project.owner}</span></div><ArrowUpRight size={17} /></Link>)}</div>{!upcoming.length && <p className="bos-panel-empty">No upcoming project delivery dates.</p>}</section>;
 }
 
 export type LocalActivity = { id: string; title: string; action: string; time: string };

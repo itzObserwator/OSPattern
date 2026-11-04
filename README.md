@@ -1,53 +1,69 @@
-# BusinessOS
+# Techgy Link / OSPattern
 
-An independent Next.js App Router application inside the Vectramind repository. The existing marketing site keeps its own dependencies, routes, styling, and build.
+Business Owner / CEO demonstration built with Next.js App Router, TypeScript, React, Brutel, Tailwind, Motion, Recharts and TanStack Table. The existing ClauseOS / Quarn inspired royal-blue, light-mode interface and module routes are preserved.
 
 ```sh
-cd businessos
 npm ci
 npm run dev
 ```
 
-Open http://localhost:3002. Run `npm run build`, `npm run typecheck`, and `npm test` for validation. The parent repository's TypeScript configuration excludes this independent app.
+Open http://localhost:3002. This independent app lives in `Vectramind/businessos`; the parent marketing site is separate. The uploaded Techgy mark is `public/techgy-link-logo.png`.
 
-With the app running, `npm run test:browser` checks the production UI using the parent repository's installed Playwright and local Chrome. It covers forms, persistence, table interactions, every module route, the mobile drawer, and overflow at five viewport sizes. Screenshots are saved in `/tmp/businessos-qa`.
+## Executive information architecture
 
-`npm run test:components` checks shared surfaces and all eleven module routes at 320, 768, 1024, and 1440px. It exercises validation focus, record creation, filter resets, selection clearing, finance tabs, assistant suggestions, manual lookup, new-session controls, mobile dialogs, and fresh-page reduced-motion behavior. Use `BUSINESSOS_URL` to select the running preview; the component suite defaults to port 3003.
+The default overview puts primary financial/delivery metrics and Needs Your Attention first. Existing financial momentum and project-health charts follow. Connected folders, priority tasks, a compact workforce summary, executive calendar, device activity, expandable departmental briefing, and rule-based insights remain individually configurable. Supporting reports expand on demand; detailed Finance, Projects, People, CRM and Marketing reports use the existing routes. `/projects/[id]` adds project performance drill-downs without replacing the Projects collection.
 
-## First delivery
+The prior illustrative ribbon has been changed to an actual six-month cash receipt / outflow band. Financial momentum defaults to Recorded data; its optional reference profile remains explicitly illustrative.
 
-- Responsive shell with sidebar collapse, mobile navigation drawer, record search, notifications, and workspace profile.
-- Overview with six record-derived KPIs, monthly financial selector, lazy-loaded Recharts analytics, accessible chart data table, project health, tasks, deadlines, project summaries, and quick creation.
-- Shared TanStack Table with filtering, search, sorting, pagination, and selection for projects, employees, tasks, leads, and financial payments.
-- Radix-based shadcn-style button and dialog primitives, Lucide icons, React Hook Form and Zod validation, Tailwind v4 theme tokens, and Motion transitions that respect reduced motion.
-- AI screen with explicit local record lookup; planned modules have honest scope descriptions.
+## Data and calculations
 
-## Data and integration boundaries
+Read [the explicit record map](docs/executive-data-map.md) before integrating another data source. `src/lib/demo-service.ts` remains the initial record adapter; `src/lib/models.ts` retains existing record types and adds optional stable-ID relationships. No records are duplicated or migrated destructively.
 
-`src/lib/demo-service.ts` supplies typed sample records. `src/lib/models.ts` defines validation and calculations. UI state lives in the workspace provider; changed records are stored under `businessos-demo-v1` in localStorage. Storage is browser-specific and contains demo data only; remove that key to reset. If storage is unavailable, mutations last for the session.
+`src/lib/executive.ts` centralizes runtime validation and calculations:
 
-Financial values use USD. Revenue totals received invoice payments and expenses total paid outflows in the selected month. Their difference is net cash movement, not accounting profit. Operational KPIs show the current workspace records regardless of the financial reporting month. Chart data covers six months through the selected month. Project progress is sample record data, not inferred from task completion. No attendance or campaign metrics are fabricated.
+- Cash inflow/outflow: Paid legacy invoice/expense records only. Net cash = receipts minus payments.
+- Accrual operating profit: earned ledger revenue minus incurred ledger expenses. Margin requires positive earned revenue.
+- Issued invoice balances: issued value minus allocated payments through the selected period end. Invoice issuance is never added to cash collections. Aging buckets use the same snapshot date.
+- Approved budget utilization: incurred spending divided by a positive budget covering exactly the reporting period. An organization-wide budget supersedes its project budgets to avoid double counting.
+- Break-even: classified fixed costs / (1 − variable costs / earned revenue); unavailable without complete cost classification and a positive contribution ratio.
+- Project profit: linked recognized revenue minus direct and allocated indirect expenses. Unallocated expenses prevent a profitability estimate. Recorded project amount is not treated as budget.
+- Project health: completed state, overdue open work/project deadline, blockers, recorded risk and configurable near-deadline progress rules.
+- Workforce utilization: estimated remaining weekly task hours / available weekly capacity. Directory status is never treated as attendance.
+- Sales conversion: won leads / leads acquired in the same period; stage history is evaluated at period end. Stage-to-stage rates require historical stage events.
+- Marketing CPL and ROAS use explicit campaign relationships. ROAS divides attributed earned revenue by paid campaign expenses categorized Advertising. Missing coverage or zero denominator returns Not available.
+- Goal achievement, remaining gap, deadline and comparison use the same underlying calculations. Delivery goals measure completion of projects due in the window, not historical on-time delivery.
 
-The user-supplied Brutel OTF assets live in `public/fonts/brutel/`. All nine static weights (100–900) are configured through `next/font/local` in `src/app/layout.tsx`, without preloading unused weights. CSS uses the supplied static weights; local Inter remains a fallback. The browser regression check verifies that Brutel Regular actually loads.
+## Working controls
 
-## Overview visual redesign
+- Shared reporting month, trailing one/three/six-month briefing period, department/project/client scope and equal-day previous-period or year comparison. Primary cards remain monthly; cash trend charts remain six-month history. Delivery/workforce remain current snapshots. Scope filters exclude unmapped records.
+- Widget show/hide, accessible up/down ordering, reset, KPI selection and configurable workload/delivery thresholds.
+- Current cross-department attention queue, severity filter, review links and explicit confirmation before a demonstration approval/rejection. New demo requests can be entered without creating fictitious financial transactions.
+- Persistent device activity with category/department filters; timestamp, responsible user and linked record.
+- Goals create/edit; executive calendar list/month views with next-30-days/reporting-period, event/priority and shared scope filters.
+- Record details support assignment, estimated hours, blockers, client/project/employee relationships, workforce capacity and sales metadata. Project links open the detailed performance page.
+- Settings supports export/review/confirmed import of validated executive snapshots. Existing records merge by ID, supplemental datasets replace the snapshot, and invalid foreign keys, duplicate identities, overpayments and inconsistent dates are rejected. Source coverage flags must only be enabled for complete supplied datasets.
 
-The overview uses a 12-column editorial composition: a royal-blue financial feature, a navy delivery summary, two compact supporting metrics, custom expense bars and revenue area chart, and a segmented project-health panel. The operations desk combines actionable tasks, recorded team assignments, delivery milestones, an honest approval-integration state, and activity observed during the current overview visit. The AI command card uses a dotted context map, connected nodes, and working links to the existing local lookup interface. Its connectors follow node positions as the layout resizes; it does not represent an execution engine.
+## Persistence and integration boundaries
 
-`dashboard.tsx` composes the view; `dashboard-panels.tsx` contains its reusable panels and numeric transitions. `finance-chart.tsx` owns the custom chart and tooltip. `app-shell.tsx` provides command search (Cmd/Ctrl+K), animated active navigation, the workspace dialog, profile, and notifications. `globals.css` centralizes the refreshed tokens, shell, overview, and responsive layouts. Existing routes, models, service adapter, storage key, and module content are preserved. Activity is in-memory feedback for this overview visit, not a server audit trail.
+Existing `businessos-demo-v1` records remain intact. Supplemental records, preferences and activity use `executive-data-v1`, `executive-preferences-v1`, and `executive-events-v1` respectively. State restores in dependency order so supplemental links to newly created projects survive reload. Storage failures produce visible session-only / recovery messages. There is no synchronization across devices or users.
 
-The Behance pages initially returned 403 errors. The user subsequently supplied the ClauseOS and Quarn reference PNGs, which were inspected directly. Their spatial depth, translucent folder layers, floating pill controls, dotted canvases, connection ports, and restrained typography inform an original light-mode, royal-blue BusinessOS interpretation. Their artwork and logos are not used. `workspace-canvas.tsx` provides selectable record folders, category filters, previous/next controls, and a record inspector; `spatial.css` owns these visual treatments and their responsive layouts.
+No accounting ledger, unpaid invoice, cash account, attendance, timesheet, campaign, organizational target or approval transaction is fabricated. Those collections start empty. The dashboard shows Not available until required sources and relationships are supplied. Only sample business records ship with the app.
 
-## Shared component design
+`src/lib/executive-service.ts` defines a future server repository contract and fail-closed executive/organization checks. This contract is tested; no production repository or authentication provider is configured. The app's local demo-owner approval controls are simulations, not production authorization. Before handling confidential data, integrate trusted server sessions, tenant-scoped reads/writes, permission-checked mutations, approval policies, financial reconciliation, and durable audit storage. No salary fields are added. AI responses are deterministic rules or the existing local lookup; workflow execution and external approvals are not connected. Client portal, workflow engine and sandbox remain explicit previews.
 
-`src/app/components.css` extends the same visual system across every existing surface: collection summaries, module headers, record tables, sorting and search controls, status filters, pagination, row selection, avatars, badges, forms, validation messages, overlays, notifications, search results, record details, empty states, loading skeletons, and recovery pages. Module content remains within the implemented demo scope.
+## Verification
 
-The AI workspace separates local record context from conversation, supports fresh lookups, and labels every response as a browser-local result. Settings groups workspace information and connection status into coordinated panels. Planned modules use a layered folder empty state and explicitly describe the functionality that is not yet connected. Shared controls retain their original data contracts and accessible names. Route and entrance animations use hydration-stable initial markup and respect reduced motion.
+```sh
+npm run typecheck
+npm test
+npm run build
+# With the preview running and Playwright/Chrome installed:
+BUSINESSOS_URL=http://localhost:3002 npm run test:browser
+BUSINESSOS_URL=http://localhost:3002 npm run test:components
+BUSINESSOS_URL=http://localhost:3002 npm run test:executive
+BUSINESSOS_URL=http://localhost:3002 npm run test:executive-import
+```
 
-No authentication, tenant isolation, backend persistence, OS Pattern integration, AI provider, workflow execution, secure client portal, or isolated sandbox is implemented. This app must not be used with sensitive production records before those boundaries are implemented and tested.
+Domain tests cover financial basis separation, missing coverage, division by zero, invoice aging, balances, budget periods, project allocations, delivery rules, workforce utilization, sales cohorts, scoped relationships, schema validation, preferences, cross-year periods and executive authorization. Browser suites cover approval confirmation/persistence, activity, widget ordering/visibility/reset, goals, calendar, shared dates, project details, record linking, financial snapshot import and restoration, all original workflows, responsive widths and reduced motion.
 
-## Animation and future modules
-
-Motion provides restrained KPI entrances and a shared reduced-motion policy. CSS covers hover, sidebar, overlay, and loading transitions. The chart loads only on the dashboard. Heavy 3D is deliberately absent from productivity screens. Add Three.js / React Three Fiber / Drei behind a client dynamic-import boundary when a concrete onboarding or illustration experience is developed; provide a static fallback and handle WebGL context failure. React Flow belongs in the workflow module when its local editor is implemented. Zustand, TanStack Query, and GSAP are unnecessary for this first phase; introduce them when shared UI state, real API synchronization, or complex timeline animation warrants them.
-
-Next step: confirm the supported backend contract, authentication, tenancy, and role matrix, then implement an end-to-end project/task workflow against that contract. Marketing, client portal, workflows, and sandbox currently have routed scope pages rather than simulated functionality.
+No 3D dependency is added to these productivity screens. Brutel uses supplied local font files; Next Image serves the supplied logo. Interactive animations respect reduced-motion preferences.

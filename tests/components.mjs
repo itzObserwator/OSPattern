@@ -1,7 +1,7 @@
 import { chromium, expect } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 
-const base = process.env.BUSINESSOS_URL || "http://127.0.0.1:3003";
+const base = process.env.BUSINESSOS_URL || "http://localhost:3002";
 const output = "/tmp/businessos-qa";
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ channel: "chrome", headless: true });
@@ -12,6 +12,7 @@ page.on("console", message => { if (message.type() === "error") errors.push(mess
 async function visit(slug) {
   const response = await page.goto(`${base}/${slug}`, { waitUntil: "networkidle" });
   expect(response.status()).toBe(200);
+  await page.locator("[data-executive-ready=true]").waitFor({state:"attached"});
   await expect(page.locator("h1")).toBeVisible();
 }
 async function noOverflow(label) {
@@ -58,8 +59,8 @@ try {
   await expect(page.locator(".bos-settings")).toContainText("Brutel");
   await page.screenshot({ path: `${output}/settings-desktop.png`, fullPage: true });
   await visit("workflows");
-  await expect(page.locator(".bos-planned-module")).toContainText("not connected");
-  await page.screenshot({ path: `${output}/planned-workspace.png`, fullPage: true });
+  await expect(page.locator(".module-showcase")).toContainText("Sample data");
+  await page.screenshot({ path: `${output}/workflow-showcase.png`, fullPage: true });
   for (const width of [320, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
     for (const slug of ["projects", "tasks", "hrms", "crm", "finance", "marketing", "client-portal", "workflows", "sandbox", "settings", "ai-assistant"]) {
@@ -85,7 +86,7 @@ try {
   await page.keyboard.press("Escape");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await visit("workflows");
-  await page.screenshot({ path: `${output}/planned-mobile.png`, fullPage: true });
+  await page.screenshot({ path: `${output}/workflow-showcase-mobile.png`, fullPage: true });
   await visit("");
   await expect(page.locator("h1")).toHaveText("Everything, in sync.");
   expect(errors).toEqual([]);

@@ -554,3 +554,29 @@ input[type=checkbox] { border-radius: 5px; cursor: pointer; width: 17px; height:
   .bos-pulse-breakdown { grid-template-rows:auto auto auto; align-content:center; }
   .bos-pulse-ring { height:clamp(240px,20vw,300px); max-height:300px; align-self:center; }
 }
+
+/* Balance the overview pair around the plots, with compact supporting rows. */
+.bos-momentum-chart.bos-chart { height:clamp(210px,22cqi,230px); }
+.bos-momentum-panel .bos-analytics-totals { padding-top:10px; padding-bottom:8px; }
+.bos-momentum-mode { padding-bottom:8px; }
+.bos-momentum-statistics { padding-top:8px; }
+.bos-momentum-timeline { padding-top:0; padding-bottom:16px; }
+.bos-momentum-timeline output { margin-top:8px; }
+@media(min-width:861px) {
+  .bos-pulse-breakdown { flex:0; grid-template-rows:auto auto auto; align-content:start; padding:12px 20px 16px; gap:8px; margin-block:auto; }
+  .bos-pulse-ring { height:300px; max-height:none; max-width:360px; }
+  .bos-pulse-legend { padding-top:10px; }
+  .bos-pulse-legend>button { min-height:42px; }
+}
+@media(max-width:767px) {
+  .bos-momentum-chart.bos-chart { height:220px; }
+}
+
+/* Uploaded Techgy Link brand mark. */
+.bos-techgy-logo { width:32px; height:32px; display:block; flex-shrink:0; border-radius:8px; object-fit:contain; }
+
+.bos-brand-copy { display:flex; flex-direction:column; gap:3px; line-height:1.1; }
+.bos-brand-copy>strong { color:#173C4B; }
+.bos-brand-copy>small { font-size:14px; font-weight:400; letter-spacing:0; color:#5B717A; }
+.is-collapsed .bos-brand-copy { display:none; }
+.bos-mobile-nav .bos-brand-copy { display:flex; }

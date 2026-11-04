@@ -9,7 +9,10 @@
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "test:browser": "node tests/browser.mjs",
-    "test:components": "node tests/components.mjs"
+    "test:components": "node tests/components.mjs",
+    "test:executive": "node tests/executive-browser.mjs",
+    "test:executive-import": "node tests/executive-import.mjs",
+    "test:owner": "node tests/owner-workflow.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "7.0.1",
@@ -36,5 +39,8 @@
     "@types/react-dom": "19.3.0",
     "typescript": "7.0.2"
   },
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  }
 }
