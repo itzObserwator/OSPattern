@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, animate, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, ArrowUpRight, ChartNoAxesColumn, ChartPie, Check, CheckCircle2, CircleDashed, Clock3, FolderKanban, Plus, Search, Sparkles, TrendingUp, Users } from "lucide-react";
 import { financialSeries, money, type BusinessRecord } from "@/lib/models";
@@ -54,46 +54,30 @@ type Summary = { projects: number; employees: number; revenue: number; expenses:
 
 export function PrimaryFeatureCard({ records, month, summary, previous }: { records: BusinessRecord[]; month: string; summary: Summary; previous: Summary }) {
   const series = financialSeries(records, month);
-  const patternId = useId().replace(/:/g, "");
   const [activeIndex, setActiveIndex] = useState(5);
   const active = series[activeIndex];
-  const forecast = series.map(row => row.revenue);
-  const outflow = series.map(row => row.expenses);
-  const x = [0, 120, 232, 339, 447, 570];
-  const maximum = Math.max(1, ...forecast, ...outflow);
-  const revenues = forecast.map((value,index) => ({x:x[index], y:145-value/maximum*125}));
-  const expenses = outflow.map((value,index) => ({x:x[index], y:145-value/maximum*125}));
-  const coordinates = (points: { x: number; y: number }[]) => points.map(p => `${p.x},${p.y}`).join(" ");
-  const band = `${coordinates(revenues)} ${coordinates([...expenses].reverse())}`;
-  const margin = forecast[activeIndex] > 0 ? (forecast[activeIndex] - outflow[activeIndex]) / forecast[activeIndex] * 100 : null;
+  const maximum = Math.max(1, ...series.map(row => row.revenue));
   const change = previous.revenue ? (summary.revenue - previous.revenue) / previous.revenue * 100 : null;
   const monthName = new Date(`${month}-01T12:00:00Z`).toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
-  const markerY = (revenues[activeIndex].y + expenses[activeIndex].y) / 2;
-  return <section className="bos-primary-feature bos-kpi bos-range-card" aria-label="Monthly financial performance">
+  return <section className="bos-primary-feature bos-kpi bos-range-card bos-performance-columns" aria-label="Monthly financial performance">
     <header className="bos-range-heading"><h2>Financial performance</h2><Link href="/finance" className="bos-feature-arrow" aria-label="View financial records"><ArrowUpRight size={22} /></Link></header>
     <div className="exec-cash-headline"><strong>{money(summary.revenue)}</strong><span>received · {money(summary.revenue-summary.expenses)} net cash</span></div>
-    <div className="bos-range-chart">
-      <span className="bos-range-label">Cash received</span>
-      <div className="bos-range-plot">
-        <svg viewBox="0 0 570 160" preserveAspectRatio="none" aria-hidden="true">
-          <defs>
-            <pattern id={patternId} width="15" height="15" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="15" fill="currentColor" /></pattern>
-            <mask id={`${patternId}-inset`} maskUnits="userSpaceOnUse" x="-8" y="0" width="586" height="160"><polygon points={band} fill="white" stroke="black" strokeWidth="7" strokeLinejoin="round" /></mask>
-          </defs>
-          <polygon points={band} fill={`url(#${patternId})`} mask={`url(#${patternId}-inset)`} />
-          <polyline points={coordinates(revenues)} className="bos-range-boundary" />
-          <polyline points={coordinates(expenses)} className="bos-range-boundary" />
-          <line x1={revenues[activeIndex].x} y1={revenues[activeIndex].y} x2={expenses[activeIndex].x} y2={expenses[activeIndex].y} className="bos-range-cursor" />
-        </svg>
-        {[revenues, expenses].map((points, line) => points.map((point, index) => <span key={`${line}-${index}`} className="bos-range-point" aria-hidden="true" style={{ left: `${point.x / 570 * 100}%`, top: `${point.y / 160 * 100}%` }} />))}
-        <span className="bos-range-badge" style={{ left: `clamp(24px, ${revenues[activeIndex].x / 570 * 100}%, calc(100% - 24px))`, top: `${markerY / 160 * 100}%` }}>{margin === null ? "—" : `${Math.round(margin)}%`}</span>
-        <div className="bos-range-hitareas">{series.map((row, index) => <button key={row.month} type="button" aria-label={`${row.month}: received ${money(forecast[index])}, paid ${money(outflow[index])}`} aria-pressed={activeIndex === index} onPointerEnter={() => setActiveIndex(index)} onFocus={() => setActiveIndex(index)} onClick={() => setActiveIndex(index)} />)}</div>
-      </div>
-      <span className="bos-range-label bos-range-expense-label">Cash paid</span>
-      <div className="bos-range-months" aria-hidden="true">{series.map((row, index) => <span key={row.month} className={activeIndex === index ? "active" : ""}>{row.month}</span>)}</div>
+    <div className="bos-performance-chart" role="group" aria-label="Monthly cash received. Select a column for its amount.">
+      <div className="bos-performance-chart-label">Cash received <span>{series[0].month} — {series[5].month}</span></div>
+      <div className="bos-performance-bars">{series.map((row, index) => <button
+        key={row.month} type="button" className={`bos-performance-column ${activeIndex === index ? "active" : ""}`}
+        aria-label={`${row.month}: cash received ${money(row.revenue)}, cash paid ${money(row.expenses)}`}
+        aria-pressed={activeIndex === index} onPointerEnter={() => setActiveIndex(index)} onFocus={() => setActiveIndex(index)} onClick={() => setActiveIndex(index)}
+      >
+        <span className="bos-performance-bar" style={{ height: `${row.revenue / maximum * 100}%` }}>
+          {activeIndex === index && <span className="bos-performance-callout">{money(row.revenue)}</span>}
+          <span className="bos-performance-cap" />
+        </span>
+        <span className="bos-performance-month">{row.month}</span>
+      </button>)}</div>
     </div>
-    <div className="sr-only" aria-live="polite">{active.month} · {margin === null ? "No received revenue" : `${margin.toFixed(1)}% net cash / revenue`}. {monthName}. Monthly revenue {money(summary.revenue)}. Monthly expenses {money(summary.expenses)}. Net cash movement {money(summary.revenue - summary.expenses)}.</div>
-    <span className="sr-only">{change === null ? "No prior-period payments" : `${Math.abs(change).toFixed(1)}% ${change >= 0 ? "up" : "down"} from previous month`}. Chart shows six months of paid cash receipts and outflows. The badge is net cash divided by cash receipts, not operating margin.</span>
+    <div className="sr-only" aria-live="polite">{active.month}: cash received {money(active.revenue)}, cash paid {money(active.expenses)}, net cash {money(active.revenue-active.expenses)}. Reporting month {monthName}.</div>
+    <span className="sr-only">{change === null ? "No prior-period payments" : `${Math.abs(change).toFixed(1)}% ${change >= 0 ? "up" : "down"} from previous month`}. Columns show six months of paid cash receipts.</span>
   </section>;
 }
 
