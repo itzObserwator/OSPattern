@@ -1,6 +1,9 @@
 // Fictional client identities available for explicitly linking sample records.
 // Selecting an option does not import portal invoices, balances or other financial fixtures.
+export const salaryClientOption = { id: "client-salary", name: "Salary" } as const;
+
 export const sampleRecordClients = [
+  salaryClientOption,
   { id: "sample-client-acme", name: "Acme Studio" },
   { id: "sample-client-atlas", name: "Atlas Digital" },
   { id: "sample-client-nova", name: "Nova Collective" },

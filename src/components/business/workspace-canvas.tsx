@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight, ArrowUpRight, CheckSquare2, CircleDollarSign, FolderKanban, Layers3, Plus, TrendingUp, Users } from "lucide-react";
@@ -18,6 +19,7 @@ const spaces = [
 
 export function WorkspaceCanvas({ records, month }: { records: BusinessRecord[]; month: string }) {
   const [selected, setSelected] = useState(0);
+  const router = useRouter();
   const folderId = useId().replace(/:/g, "");
   const [filter, setFilter] = useState("All spaces");
   const reduced = useReducedMotion();
@@ -64,7 +66,7 @@ export function WorkspaceCanvas({ records, month }: { records: BusinessRecord[];
             if (offset > visible.length / 2) offset -= visible.length;
             const amount = space.metric === "revenue" ? money(summary.revenue) : String(summary[space.metric]);
             const previews = records.filter(record => record.kind === space.kind && (space.kind !== "invoice" || record.date.startsWith(month))).slice(0, 3);
-            return <button key={space.id} className={`bos-spatial-folder ${selected === space.index ? "selected" : ""}`} onClick={() => setSelected(space.index)} aria-pressed={selected === space.index} aria-label={`Focus ${space.title}`} style={{ "--folder-offset": offset, "--folder-distance": Math.abs(offset), "--folder-right": offset > 0 ? 1 : 0, zIndex: 10 - Math.abs(offset) } as CSSProperties}>
+            return <button key={space.id} className={`bos-spatial-folder ${selected === space.index ? "selected" : ""}`} onClick={() => { if (selected === space.index) router.push(`/${space.id}`); else setSelected(space.index); }} aria-pressed={selected === space.index} aria-label={selected === space.index ? `Open ${space.title} folder` : `Focus ${space.title}`} style={{ "--folder-offset": offset, "--folder-distance": Math.abs(offset), "--folder-right": offset > 0 ? 1 : 0, zIndex: 10 - Math.abs(offset) } as CSSProperties}>
               <span className="bos-folder-backplate" aria-hidden="true" />
               {["back", "middle", "front"].map((layer, index) => <span key={layer} className={`bos-folder-paper paper-${layer}`} aria-hidden="true"><i /><i /><i /><span className="bos-folder-document"><strong>{previews[index]?.title ?? `${space.title} records`}</strong><small>{previews[index]?.owner ?? "Studio North"}</small><span>{previews[index]?.status ?? "Workspace overview"}</span><i /><i /><i /></span></span>)}
               <svg className="bos-folder-pocket" viewBox="0 0 220 220" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id={`${folderId}-${space.id}`} x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="var(--folder-front-top)" /><stop offset="100%" stopColor="var(--folder-front-bottom)" /></linearGradient></defs><path d="M1 81C1 65 13 53 29 53H71C100 53 112 74 143 74H191C207 74 219 86 219 102V191C219 207 207 219 191 219H29C13 219 1 207 1 191Z" fill={`url(#${folderId}-${space.id})`} /></svg>

@@ -15,7 +15,12 @@ export function WorkspaceProvider({initialRecords, children}: {initialRecords: B
   const [kind, setKind] = useState<RecordKind>("task");
   const [open, setOpen] = useState(false);
   useEffect(() => {
-    try { const saved = localStorage.getItem(key); if (saved) setRecords(recordListSchema.parse(JSON.parse(saved))); }
+    try { const saved = localStorage.getItem(key); if (saved) setRecords(recordListSchema.parse(JSON.parse(saved)).map(record => {
+      const seed=initialRecords.find(item=>item.id===record.id);
+      // Add missing demo metadata without replacing edited values or custom records.
+      const leadDefaults=record.kind==="lead"&&seed&&!record.stage&&!record.stageHistory?.length?{date:seed.date,stage:seed.stage,source:record.source??seed.source,stageHistory:seed.stageHistory,closedDate:seed.closedDate,followUpDate:record.followUpDate??seed.followUpDate,status:record.status==="Active"?seed.status:record.status}:{};
+      return seed?{...record,...leadDefaults,contactName:record.contactName??seed.contactName,contactEmail:record.contactEmail??seed.contactEmail,jobTitle:record.jobTitle??seed.jobTitle,departmentId:record.departmentId??seed.departmentId,weeklyCapacityHours:record.weeklyCapacityHours??seed.weeklyCapacityHours,estimatedHours:record.estimatedHours??seed.estimatedHours}:record;
+    })); }
     catch { setStorageMessage("Demo workspace · saved data unavailable; showing sample records"); }
     finally { setRecordsReady(true); }
   }, []);

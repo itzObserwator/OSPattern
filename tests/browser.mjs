@@ -20,13 +20,13 @@ try {
   expect(brutelLoaded, "Brutel regular must actually load").toBe(true);
   await mkdir("/tmp/businessos-qa",{recursive:true});
   await page.locator(".bos-spatial-workspace").screenshot({path:"/tmp/businessos-qa/workspace-canvas.png"});
-  await expect(page.locator(".bos-kpi").filter({hasText:"Monthly revenue"})).toContainText("$54,000");
+  await expect(page.locator(".bos-kpi").filter({hasText:"Monthly revenue"})).toContainText("₹54,000");
   await page.getByRole("button",{name:"Focus People",exact:true}).click();
   await expect(page.getByRole("complementary",{name:"Selected workspace space details"})).toContainText("A connected team");
   await page.getByRole("button",{name:"Business",exact:true}).click();
   await expect(page.getByRole("button",{name:"Focus People",exact:true})).toHaveCount(0);
   await page.getByRole("button",{name:"Focus Finance",exact:true}).click();
-  await expect(page.locator(".bos-inspector-metric")).toContainText("$54,000");
+  await expect(page.locator(".bos-inspector-metric")).toContainText("₹54,000");
   await page.getByRole("button",{name:"Previous workspace space"}).click();
   await expect(page.getByRole("complementary",{name:"Selected workspace space details"})).toContainText("Opportunities ahead");
   await page.getByRole("button",{name:"All spaces",exact:true}).click();
@@ -43,7 +43,7 @@ try {
   await expect(page.getByRole("dialog")).toContainText("Needs your attention");
   await page.keyboard.press("Escape");
   await page.getByLabel("Financial reporting month").selectOption("2026-09");
-  await expect(page.locator(".bos-kpi").filter({hasText:"Monthly revenue"})).toContainText("$46,000");
+  await expect(page.locator(".bos-kpi").filter({hasText:"Monthly revenue"})).toContainText("₹46,000");
   await page.getByLabel("Financial reporting month").selectOption("2026-10");
   const pendingValue = () => page.locator(".bos-delivery-value [aria-hidden=true]");
   await page.keyboard.press("ControlOrMeta+k");
@@ -105,7 +105,7 @@ try {
   await page.getByRole("slider",{name:"Select financial momentum month"}).focus();
   await page.keyboard.press("End");
   await expect(momentumOutput).toContainText("Oct 2026");
-  await expect(momentumOutput).toContainText("$54,000");
+  await expect(momentumOutput).toContainText("₹54,000");
   await page.mouse.move(0,0);
   await page.evaluate(()=>window.scrollTo(0,0));
   await page.screenshot({path:"/tmp/businessos-qa/desktop.png",fullPage:true});

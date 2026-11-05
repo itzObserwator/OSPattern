@@ -9,6 +9,9 @@ export const recordSchema = z.object({
   amount: z.number().finite().nonnegative(), progress: z.number().min(0).max(100),
   departmentId: z.string().optional(), clientId: z.string().optional(), projectId: z.string().optional(),
   employeeId: z.string().optional(), campaignId: z.string().optional(), category: z.string().optional(),
+  contactName: z.string().trim().max(100).optional(),
+  contactEmail: z.email().optional(),
+  jobTitle: z.string().trim().max(80).optional(),
   estimatedHours: z.number().nonnegative().optional(), weeklyCapacityHours: z.number().positive().optional(),
   blocker: z.boolean().optional(),
   stage: z.enum(["New Lead", "Contacted", "Qualified", "Proposal Sent", "Negotiation", "Won", "Lost"]).optional(),
@@ -18,10 +21,10 @@ export const recordSchema = z.object({
 });
 export type BusinessRecord = z.infer<typeof recordSchema>;
 export const recordListSchema = z.array(recordSchema);
-export const createSchema = recordSchema.pick({ title: true, owner: true, date: true, amount: true });
+export const createSchema = recordSchema.pick({ title: true, owner: true, date: true, amount: true, jobTitle: true, contactName: true, contactEmail: true, source: true, followUpDate: true });
 export type CreateValues = z.infer<typeof createSchema>;
 export type Month = "2026-09" | "2026-10" | "2026-11";
-export const money = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+export const money = (n: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
 
 export function summarize(records: BusinessRecord[], month: string) {
   const sum = (kind: RecordKind) => records.filter(r => r.kind === kind && r.status === "Paid" && r.date.startsWith(month)).reduce((n, r) => n + r.amount, 0);

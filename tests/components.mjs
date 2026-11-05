@@ -54,7 +54,7 @@ try {
   await expect(page.getByRole("heading", { name: "What’s on your mind?" })).toBeVisible();
   await page.getByRole("textbox", { name: "Ask about demo records" }).fill("Find active sales leads");
   await page.getByRole("button", { name: "Send question" }).click();
-  await expect(page.locator(".bos-messages")).toContainText("5 matching records");
+  await expect(page.locator(".bos-messages")).toContainText("3 matching records");
   await visit("settings");
   await expect(page.locator(".bos-settings")).toContainText("Brutel");
   await page.screenshot({ path: `${output}/settings-desktop.png`, fullPage: true });

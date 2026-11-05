@@ -10,6 +10,10 @@ import "./executive.css";
 import "./techgy-brand.css";
 import "./showcases.css";
 import "./employee-profile.css";
+import "./overview-summaries.css";
+import "./finance-workspace.css";
+import "./module-workspaces.css";
+import "./showcase-studio.css";
 
 const brutel = localFont({
   src: [

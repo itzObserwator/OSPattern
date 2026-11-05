@@ -114,7 +114,7 @@ export function workforceIntelligence(records:BusinessRecord[],data:ExecutiveDat
  const approvedLeave=data.approvals.filter(a=>a.type==="Leave"&&a.status==="Approved"&&a.employeeId&&a.leaveStart&&a.leaveEnd&&a.leaveStart<=today&&a.leaveEnd>=today&&people.some(p=>p.person.id===a.employeeId)&&!attendance.some(r=>r.employeeId===a.employeeId));
  const leaveCount=new Set([...attendance.filter(a=>a.status==="Leave").map(a=>a.employeeId),...approvedLeave.map(a=>a.employeeId!)]).size;
  const allKnown=people.length>0&&people.every(p=>p.utilization!==null);
- return {people,total:people.length,unreported:data.coverage.attendance?people.length-attendance.length:null,unassigned:people.filter(p=>!p.tasks.length).length,available:allKnown?people.filter(p=>p.utilization!<100).length:null,utilization:allKnown?sum(people,p=>p.hours)/sum(people,p=>p.person.weeklyCapacityHours!)*100:null,overloaded:allKnown?people.filter(p=>p.status==="Overloaded").length:null,present:data.coverage.attendance?attendance.filter(a=>a.status==="Present").length:null,leave:data.coverage.attendance||approvedLeave.length?leaveCount:null,absent:data.coverage.attendance?attendance.filter(a=>a.status==="Absent").length:null,overtime:data.coverage.timesheets?sum(data.timesheets.filter(t=>t.date>=start&&t.date<=today),t=>t.overtime):null};
+ return {people,total:people.length,unreported:data.coverage.attendance?people.length-attendance.length:null,unassigned:people.filter(p=>!p.tasks.length).length,available:allKnown?people.filter(p=>p.utilization!<100&&!attendance.some(a=>a.employeeId===p.person.id&&a.status!=="Present")&&!approvedLeave.some(a=>a.employeeId===p.person.id)).length:null,utilization:allKnown?sum(people,p=>p.hours)/sum(people,p=>p.person.weeklyCapacityHours!)*100:null,overloaded:allKnown?people.filter(p=>p.status==="Overloaded").length:null,present:data.coverage.attendance?attendance.filter(a=>a.status==="Present").length:null,leave:data.coverage.attendance||approvedLeave.length?leaveCount:null,absent:data.coverage.attendance?attendance.filter(a=>a.status==="Absent").length:null,overtime:data.coverage.timesheets?sum(data.timesheets.filter(t=>t.date>=start&&t.date<=today),t=>t.overtime):null};
 }
 export function salesIntelligence(records:BusinessRecord[],data:ExecutiveData,period:Period) {
  const cohort=records.filter(r=>r.kind==="lead"&&within(r.date,period)).map(r=>{
@@ -122,7 +122,7 @@ export function salesIntelligence(records:BusinessRecord[],data:ExecutiveData,pe
   const stage=historical?.stage??(r.closedDate&&r.closedDate<=period.to&&(r.stage==="Won"||r.stage==="Lost")?r.stage:undefined);
   return {...r,stage:stage as BusinessRecord["stage"]};
  });
- const known=cohort.every(l=>!!l.stage)&&data.coverage.sales;
+ const known=cohort.every(l=>!!l.stage);
  const won=cohort.filter(l=>l.stage==="Won"),lost=cohort.filter(l=>l.stage==="Lost");
  const stagesData=stages.map(stage=>({stage,count:cohort.filter(l=>l.stage===stage).length,value:sum(cohort.filter(l=>l.stage===stage),l=>l.amount)}));
  const reached=stages.slice(0,5).map(stage=>({stage,count:cohort.filter(l=>l.stage===stage||l.stageHistory?.some(h=>h.stage===stage&&h.date<=period.to)).length}));

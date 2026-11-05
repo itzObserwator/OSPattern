@@ -39,10 +39,10 @@ export default function FinanceChart({ records, month }: { records: BusinessReco
   const median = (sorted[2] + sorted[3]) / 2;
   const average = sorted.reduce((total, value) => total + value, 0) / sorted.length;
   const format = (value: number) => illustrative ? value.toFixed(2) : money(value);
-  const compact = (value: number) => illustrative ? value.toFixed(2) : new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 1 }).format(value);
+  const compact = (value: number) => illustrative ? value.toFixed(2) : new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", notation: "compact", maximumFractionDigits: 1 }).format(value);
   const year = new Date(Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5)) - 6 + selected, 1)).getUTCFullYear();
   return <div className="bos-momentum-visual">
-    <div className="bos-momentum-mode"><div role="group" aria-label="Financial momentum chart data"><button type="button" aria-pressed={illustrative} onClick={() => setIllustrative(true)}>Reference curve</button><button type="button" aria-pressed={!illustrative} onClick={() => setIllustrative(false)}>Recorded data</button></div><span>{illustrative ? "Illustrative index · not recorded revenue" : "Recorded monthly revenue · USD"}</span></div>
+    <div className="bos-momentum-mode"><div role="group" aria-label="Financial momentum chart data"><button type="button" aria-pressed={illustrative} onClick={() => setIllustrative(true)}>Reference curve</button><button type="button" aria-pressed={!illustrative} onClick={() => setIllustrative(false)}>Recorded data</button></div><span>{illustrative ? "Illustrative index · not recorded revenue" : "Recorded monthly revenue · INR"}</span></div>
     <div className="bos-momentum-statistics"><span><strong>{illustrative ? referenceArea.length : data.length}</strong> {illustrative ? "shape points" : "monthly points"}</span><dl>{[["Min", sorted[0]], ["Max", sorted[5]], ["Median", median], ["Average", average]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{compact(Number(value))}</dd></div>)}</dl></div>
     <div className="bos-chart bos-momentum-chart" aria-label={illustrative ? "Illustrative reference profile with a wavy area and six smooth trend pivots. Select Recorded data to view cash records." : `Monthly revenue and expenses ending ${month}. Select a month on the timeline for exact figures.`}>
       <ResponsiveContainer width="100%" height="100%" minWidth={0}>

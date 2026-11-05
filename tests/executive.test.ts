@@ -46,3 +46,41 @@ test("goals use actual cash and keep accounting targets unavailable without acco
 
 test("budget spending excludes costs outside its approved project scope",()=>{const d=emptyExecutive();d.coverage.accounting=true;d.coverage.budgets=true;d.budgets=[{id:'b',projectId:'p',start:period.from,end:period.to,amount:1000}];d.ledger=[{id:'in',projectId:'p',kind:'expense',date:'2026-10-10',amount:200,category:'Delivery'},{id:'outside',projectId:'q',kind:'expense',date:'2026-10-10',amount:900,category:'Delivery'}];const f=financialIntelligence([],d,period,'2026-11-04');assert.equal(f.budget,20);assert.equal(f.incurred,1100);assert.equal(f.budgetActual,200);});
 test("approved leave is linked to an employee and does not override recorded attendance",()=>{const d=emptyExecutive();const employee=record({id:'employee',kind:'employee',status:'Active'});d.approvals=[{id:'leave',type:'Leave',title:'Annual leave',owner:'Alex',employeeId:'employee',leaveStart:'2026-11-04',leaveEnd:'2026-11-05',due:'2026-11-03',severity:'Low',status:'Approved'}];assert.equal(workforceIntelligence([employee],d,'2026-11-04',defaultPreferences).leave,1);d.coverage.attendance=true;d.attendance=[{id:'a',employeeId:'employee',date:'2026-11-04',status:'Present'}];const w=workforceIntelligence([employee],d,'2026-11-04',defaultPreferences);assert.equal(w.leave,0);assert.equal(w.present,1);});
+
+// @ts-ignore Node native type stripping uses explicit extensions.
+import { withWorkforceDemo } from "../src/lib/workforce-demo.ts";
+test("workforce sample links roles, estimates, attendance and timesheets without duplicating saved data",async()=>{
+ const records=await demoService.getRecords();
+ const data=validateExecutive(withWorkforceDemo(emptyExecutive(),records,"2026-11-05"),records);
+ const result=workforceIntelligence(records,data,"2026-11-05",defaultPreferences);
+ assert.equal(result.present,10);assert.equal(result.leave,1);assert.equal(result.absent,1);
+ assert.equal(result.available,9);assert.equal(result.overloaded,1);assert.equal(result.overtime,2);
+ assert.equal(result.people.find(p=>p.person.title==="Olivia Chen")?.person.jobTitle,"Product Designer");
+ assert.equal(result.people.find(p=>p.person.title==="Olivia Chen")?.utilization,70);
+ assert.deepEqual(withWorkforceDemo(data,records,"2026-11-06"),data);
+});
+
+// @ts-ignore Node native type stripping uses explicit extensions.
+import { withSalesDemo } from "../src/lib/sales-demo.ts";
+test("CRM sample derives pipeline, conversion, source attribution and dated stage history",async()=>{
+ const records=await demoService.getRecords();
+ const data=withSalesDemo(emptyExecutive(),records);
+ const report=salesIntelligence(records,data,{from:"2026-10-01",to:"2026-10-31"});
+ assert.equal(report.known,true);assert.equal(report.historyComplete,true);
+ assert.equal(report.newLeads,5);assert.equal(report.active,3);assert.equal(report.won,1);assert.equal(report.lost,1);
+ assert.equal(report.pipeline,60000);assert.equal(report.conversion,20);
+ assert.equal(records.filter(r=>r.kind==="lead"&&r.status==="Active").length,3);
+ assert.equal(report.cohort.every(r=>r.source&&r.contactName&&r.contactEmail),true);
+ assert.equal(withSalesDemo(data,records),data);
+ assert.equal(withSalesDemo(emptyExecutive(),[...records,record({id:"custom-lead",kind:"lead"})]).coverage.sales,false);
+});
+
+test("complete dated CRM records remain reportable when a legacy sales coverage flag is false",async()=>{
+ const records=await demoService.getRecords();
+ const data=emptyExecutive();
+ assert.equal(data.coverage.sales,false);
+ const report=salesIntelligence(records,data,{from:"2026-10-01",to:"2026-10-31"});
+ assert.equal(report.known,true);assert.equal(report.won,1);assert.equal(report.conversion,20);
+ const empty=salesIntelligence(records,data,{from:"2026-11-01",to:"2026-11-30"});
+ assert.equal(empty.newLeads,0);assert.equal(empty.won,0);assert.equal(empty.conversion,null);
+});

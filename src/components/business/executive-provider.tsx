@@ -1,8 +1,10 @@
 "use client";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { z } from "zod";
-import { defaultPreferences, preferenceSchema, emptyExecutive, validateExecutive, type ExecutiveData, type Preferences, type ActivityEvent } from "@/lib/executive";
+import { defaultPreferences, preferenceSchema, executiveSchema, emptyExecutive, validateExecutive, type ExecutiveData, type Preferences, type ActivityEvent } from "@/lib/executive";
 import { recordListSchema, recordSchema, type BusinessRecord } from "@/lib/models";
+import { withSalesDemo } from "@/lib/sales-demo";
+import { withWorkforceDemo } from "@/lib/workforce-demo";
 import { useWorkspace } from "./workspace-provider";
 
 const activitySchema=z.array(z.object({id:z.string(),title:z.string(),action:z.string(),at:z.iso.datetime(),department:z.string(),user:z.string(),recordId:z.string(),href:z.string(),category:z.string()}));
@@ -15,7 +17,9 @@ export function ExecutiveProvider({children,recordsReady}:{children:React.ReactN
  const currentRecords=useRef(records); currentRecords.current=records;
  useEffect(()=>{
   if(!recordsReady)return;
-  try { const raw=localStorage.getItem("executive-data-v1");if(raw)setDataState(validateExecutive(JSON.parse(raw),currentRecords.current)); }catch{try{const saved=localStorage.getItem("executive-data-v1");if(saved)localStorage.setItem("executive-data-recovery-v1",saved);}catch{}setNotice("Executive data could not be restored. A recovery snapshot was retained when browser storage allowed it. Existing workspace records are preserved.");}
+  try { const raw=localStorage.getItem("executive-data-v1");const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Kolkata",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+   const restored=raw?executiveSchema.parse(JSON.parse(raw)):emptyExecutive();
+   setDataState(validateExecutive(withSalesDemo(withWorkforceDemo(restored,currentRecords.current,today),currentRecords.current),currentRecords.current)); }catch{try{const saved=localStorage.getItem("executive-data-v1");if(saved)localStorage.setItem("executive-data-recovery-v1",saved);}catch{}setNotice("Executive data could not be restored. A recovery snapshot was retained when browser storage allowed it. Existing workspace records are preserved.");}
   try { const raw=localStorage.getItem("executive-preferences-v1");if(raw)setPrefsState(preferenceSchema.parse(JSON.parse(raw))); }catch{setNotice("Saved layout is unavailable. Using the default layout.");}
   try { const raw=localStorage.getItem("executive-events-v1");if(raw)setEvents(activitySchema.parse(JSON.parse(raw))); }catch{setNotice("Device activity history is unavailable.");}
   setReady(true);
