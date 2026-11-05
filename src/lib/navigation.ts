@@ -1,9 +1,9 @@
-import { LayoutDashboard, CheckSquare2, Users, FolderKanban, TrendingUp, Megaphone, Wallet, Sparkles, Workflow, FlaskConical, PanelsTopLeft, Settings2 } from "lucide-react";
+import { LayoutDashboard, CheckSquare2, Users, FolderKanban, TrendingUp, Megaphone, Wallet, Sparkles, FlaskConical, PanelsTopLeft, Settings2 } from "lucide-react";
 
 export const navigation = [
   { label: "Workspace", items: [
     { slug: "", label: "Overview", icon: LayoutDashboard, description: "A clear view of everything moving your business forward." },
-    { slug: "tasks", label: "My work", icon: CheckSquare2, kind: "task", description: "Your priorities, deadlines, and next steps in one place." },
+    { slug: "tasks", label: "Work overview", icon: CheckSquare2, kind: "task", description: "A read-only view of team priorities, ownership, and delivery risks." },
   ] },
   { label: "Operations", items: [
     { slug: "projects", label: "Projects", icon: FolderKanban, kind: "project", description: "Keep delivery, ownership, and project health in focus." },
@@ -14,7 +14,6 @@ export const navigation = [
   ] },
   { label: "Intelligence", items: [
     { slug: "ai-assistant", label: "AI Assistant", icon: Sparkles, description: "A contextual workspace for your business questions." },
-    { slug: "workflows", label: "Workflows", icon: Workflow, description: "Connect the steps that keep your business moving." },
   ] },
   { label: "Management", items: [
     { slug: "client-portal", label: "Client portal", icon: PanelsTopLeft, description: "A simpler space for client collaboration." },

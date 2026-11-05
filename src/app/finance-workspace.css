@@ -117,3 +117,59 @@
  .finance-review-records { flex:1; }
  .finance-expense-overview .finance-allocation-caption { margin-top:auto; padding-top:22px; }
 }
+
+/* Finance uses TechGy Link's shared royal-blue, navy and platinum palette. */
+.module-finance {
+ --finance-accent:var(--brand-primary);
+ --finance-ink:var(--navy);
+ --finance-muted:var(--text-muted);
+ --finance-line:var(--border);
+ --finance-tint:color-mix(in srgb,var(--brand-primary) 4%,var(--surface));
+}
+.module-finance .bos-module-title h1,
+.module-finance .exec-report-header h2,
+.module-finance .finance-ready-reports h3 { color:var(--finance-ink); }
+.module-finance .exec-filter-compact { background:var(--surface); border-color:var(--finance-line); }
+.module-finance .exec-filter-compact input[type=month],
+.module-finance .exec-filter-compact select { background:var(--canvas); border-color:var(--finance-line); color:var(--finance-ink); }
+.module-finance .exec-filter-compact .exec-context,
+.module-finance .bos-back-link:hover,
+.module-finance .bos-module-symbol,
+.module-finance .finance-kpi-emblem { color:var(--finance-accent); }
+.module-finance .finance-focused-report .exec-financial-summary>div[data-cash=true] { background:linear-gradient(135deg,var(--surface) 35%,var(--finance-tint)); border-color:var(--finance-line); }
+.module-finance .finance-focused-report .exec-financial-summary>div::after { border-color:var(--brand-soft); }
+.module-finance .finance-focused-report .exec-financial-summary strong { color:var(--finance-ink); }
+.module-finance .finance-focused-report .exec-financial-summary>div:first-child>strong { color:var(--finance-accent); }
+.module-finance .finance-focused-report .finance-kpi-emblem { background:var(--surface); border-color:var(--brand-soft); }
+.module-finance .finance-kpi-trend.finance-mini-bars { color:var(--finance-accent); }
+.module-finance .exec-financial-summary>div:nth-child(2) .finance-mini-bars { color:var(--finance-muted); }
+.module-finance .exec-financial-summary>div:nth-child(3) .finance-mini-bars { color:var(--finance-ink); }
+.module-finance .finance-mini-bars .finance-mini-bar { color:inherit; border-color:color-mix(in srgb,currentColor 20%,transparent); }
+.module-finance .finance-mini-months { color:var(--finance-muted); }
+.module-finance .finance-mini-months [data-selected=true],
+.module-finance .finance-mini-tooltip { color:var(--finance-accent); }
+.module-finance .finance-mini-baseline { background:var(--finance-line); }
+.module-finance .finance-mini-tooltip { border-color:var(--brand-soft); background:var(--surface); }
+.module-finance .finance-expense-overview { background:linear-gradient(145deg,var(--surface),var(--finance-tint)); border-color:var(--finance-line); }
+.module-finance .finance-expense-overview>strong,
+.module-finance .finance-review-amount,
+.module-finance .finance-category-review h4 { color:var(--finance-ink); }
+.module-finance .finance-expense-glyph { color:var(--finance-accent); border-color:var(--brand-soft); background:var(--surface); }
+.module-finance .finance-category-review { border-color:var(--finance-line); background:var(--surface); }
+.module-finance .finance-category-review>header,
+.module-finance .finance-review-remaining,
+.module-finance .finance-category-complete { background:var(--canvas); }
+.module-finance .finance-review-records>a,
+.module-finance .finance-category-ledger li,
+.module-finance .finance-review-remaining { border-color:var(--finance-line); }
+.module-finance .finance-review-records svg,
+.module-finance .finance-allocation-caption b { color:var(--finance-accent); }
+.module-finance .finance-allocation-track { background:repeating-linear-gradient(125deg,var(--brand-soft) 0 3px,var(--canvas) 3px 7px); }
+.module-finance .finance-allocation-track>span { background:var(--finance-accent); }
+.module-finance .finance-data-details { background:var(--canvas); border-color:var(--finance-line); }
+.module-finance .bos-tabs .bos-button[aria-pressed=true] { background:var(--brand-soft); color:var(--finance-accent); }
+.module-finance .bos-summary-icon { color:var(--finance-accent); background:var(--brand-soft); }
+.module-finance .bos-data-table th { background:var(--canvas); color:var(--text-secondary); }
+.module-finance .bos-data-table a:hover { color:var(--finance-accent); }
+.module-finance .finance-salary-cards>div { background:linear-gradient(140deg,var(--surface),var(--finance-tint)); border-color:var(--finance-line); }
+.module-finance .finance-salary-ledger { border-color:var(--finance-line); }

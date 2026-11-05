@@ -11,7 +11,7 @@ import { useWorkspace } from "./workspace-provider";
 
 const spaces = [
   { id: "projects", title: "Projects", kind: "project", icon: FolderKanban, caption: "From brief to delivery", detail: "Projects in motion", metric: "projects" },
-  { id: "tasks", title: "My work", kind: "task", icon: CheckSquare2, caption: "One next step at a time", detail: "Your next moves", metric: "tasks" },
+  { id: "tasks", title: "Work overview", kind: "task", icon: CheckSquare2, caption: "One next step at a time", detail: "Team priorities", metric: "tasks" },
   { id: "hrms", title: "People", kind: "employee", icon: Users, caption: "The people behind it all", detail: "A connected team", metric: "employees" },
   { id: "crm", title: "Sales", kind: "lead", icon: TrendingUp, caption: "Conversations to opportunities", detail: "Opportunities ahead", metric: "leads" },
   { id: "finance", title: "Finance", kind: "invoice", icon: CircleDollarSign, caption: "Every payment in perspective", detail: "Money in motion", metric: "revenue" },

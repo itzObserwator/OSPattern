@@ -1,24 +1,31 @@
 "use client";
-import { useState } from "react";
-import { ArrowDown, ArrowUp, RotateCcw, Settings2, SlidersHorizontal } from "lucide-react";
+import { useId, useState } from "react";
+import { Reorder, useDragControls, useReducedMotion } from "framer-motion";
+import { GripVertical, RotateCcw, Settings2, SlidersHorizontal } from "lucide-react";
 import { useWorkspace } from "./workspace-provider";
 import { salaryClientOption } from "@/lib/record-options";
 import { departmentOptions } from "@/lib/departments";
 import { useExecutive } from "./executive-provider";
-import { defaultPreferences, kpiNames, periodFor, scopeData, scopeRecords, type Preferences } from "@/lib/executive";
+import { defaultPreferences, kpiNames, periodFor, scopeData, scopeRecords, type Preferences, type Widget } from "@/lib/executive";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "../ui/dialog";
 import { Button } from "../ui/button";
 export const kpiLabels:Record<typeof kpiNames[number],string>={cashIn:"Cash received",cashOut:"Cash paid",cashNet:"Net cash movement",earned:"Revenue earned",incurred:"Expenses incurred",profit:"Operating profit",margin:"Operating margin",outstanding:"Outstanding invoices",budget:"Budget utilization",balance:"Cash balance",breakEven:"Break-even revenue"};
 export const widgetLabels={workspace:"Connected workspace",metrics:"Financial & project delivery overviews",attention:"Needs Your Attention",trends:"Financial momentum & delivery pulse",operations:"Tasks and workforce",briefing:"Executive briefing",assistant:"Executive insights"};
 export function useExecutiveScope(){const {records}=useWorkspace();const {data,prefs}=useExecutive();return {records:scopeRecords(records,prefs),data:scopeData(data,prefs,records),prefs,period:periodFor(prefs)};}
+function DraggableSection({widget,checked,onToggle,onMove,descriptionId}:{widget:Widget;checked:boolean;onToggle:()=>void;onMove:(direction:number)=>void;descriptionId:string}){
+ const controls=useDragControls(),reduced=useReducedMotion();
+ return <Reorder.Item as="div" value={widget} dragListener={false} dragControls={controls} layout transition={{duration:reduced?0:.16}} whileDrag={{boxShadow:"0 8px 24px #0F1A3418",zIndex:2}} className="exec-draggable-section"><label><input type="checkbox" checked={checked} onChange={onToggle}/>{widgetLabels[widget]}</label><button type="button" className="exec-section-drag-handle" aria-label={`Reorder ${widgetLabels[widget]}`} aria-describedby={descriptionId} onPointerDown={event=>controls.start(event)} onKeyDown={event=>{if(event.key==="ArrowUp"||event.key==="ArrowDown"){event.preventDefault();onMove(event.key==="ArrowUp"?-1:1);}}}><GripVertical size={18}/></button></Reorder.Item>;
+}
 export function ExecutiveFilters({compact=false}:{compact?:boolean}){
  const {records}=useWorkspace();const {data,prefs,setPrefs,setData,notice}=useExecutive();const [open,setOpen]=useState(false);const [expanded,setExpanded]=useState(false);
  const salaryClient=data.clients.find(client=>client.id===salaryClientOption.id||client.name.trim().toLowerCase()==="salary")??salaryClientOption;
  const clientOptions=data.clients.some(client=>client.id===salaryClient.id)?data.clients:[...data.clients,salaryClient];
+ const dragHelpId=useId();const [reorderMessage,setReorderMessage]=useState("");
  const filterCount=[prefs.department,prefs.project,prefs.client].filter(Boolean).length;
  const update=(patch:Partial<Preferences>)=>setPrefs({...prefs,...patch});
- const availableWidgets=prefs.order.filter(key=>key!=="attention"&&key!=="briefing"&&key!=="trends");
- function moveWidget(key:typeof availableWidgets[number],direction:number){const target=availableWidgets[availableWidgets.indexOf(key)+direction];if(!target)return;const order=[...prefs.order];const a=order.indexOf(key),b=order.indexOf(target);[order[a],order[b]]=[order[b],order[a]];update({order});}
+ const availableWidgets:Widget[]=prefs.order.filter(key=>key!=="attention"&&key!=="briefing"&&key!=="trends");
+ function reorderWidgets(next:Widget[]){let index=0;update({order:prefs.order.map(key=>availableWidgets.includes(key)?next[index++]:key)});}
+ function moveWidget(key:Widget,direction:number){const index=availableWidgets.indexOf(key),target=index+direction;if(target<0||target>=availableWidgets.length)return;const next=[...availableWidgets];[next[index],next[target]]=[next[target],next[index]];reorderWidgets(next);setReorderMessage(`${widgetLabels[key]} moved to position ${target+1} of ${next.length}.`);}
  const departments=departmentOptions(data.departments,[prefs.department,...[...records,...data.ledger,...data.campaigns,...data.invoices,...data.budgets,...data.approvals,...data.events].flatMap(r=>r.departmentId?[r.departmentId]:[])]);
  return <div className="exec-filter-shell"><div className={`exec-filter-row ${compact?"exec-filter-compact":""}`} data-expanded={expanded}><span className="exec-context"><SlidersHorizontal size={15}/>{compact?"Reporting":"Business owner view"}</span>
  {compact&&<label>Month<input type="month" aria-label="Report month" value={prefs.month} onChange={e=>{if(e.target.value)update({month:e.target.value});}}/></label>}
@@ -30,7 +37,8 @@ export function ExecutiveFilters({compact=false}:{compact?:boolean}){
  <Button variant="ghost" onClick={()=>update({department:"",project:"",client:"",range:"month",comparison:"previous"})} aria-label="Clear executive filters"><RotateCcw size={15}/></Button><Button hidden={compact&&!expanded} onClick={()=>setOpen(true)}><Settings2 size={15}/>Customize</Button></div>
  {!compact&&<p className="exec-scope-note">Sample organization · demo owner. Preferences stay on this device. Financial Overview, sales and marketing use the selected reporting range. The cash-flow chart shows six months ending in the selected month; delivery and workforce show current records. Scope filters exclude unlinked records.</p>}{notice&&<p role="status" className="exec-warning">{notice}</p>}
  <Dialog open={open} onOpenChange={setOpen}><DialogContent className="exec-settings-dialog"><DialogTitle>Make this overview yours.</DialogTitle><DialogDescription>Show, hide and reorder sections. Saved on this device.</DialogDescription>
- <div className="exec-preference-list">{availableWidgets.map((key,index)=><div key={key}><label><input type="checkbox" checked={!prefs.hidden.includes(key)} onChange={()=>update({hidden:prefs.hidden.includes(key)?prefs.hidden.filter(k=>k!==key):[...prefs.hidden,key]})}/>{widgetLabels[key]}</label><Button size="icon" aria-label={`Move ${widgetLabels[key]} up`} disabled={index===0} onClick={()=>{moveWidget(key,-1);}}><ArrowUp size={14}/></Button><Button size="icon" aria-label={`Move ${widgetLabels[key]} down`} disabled={index===availableWidgets.length-1} onClick={()=>{moveWidget(key,1);}}><ArrowDown size={14}/></Button></div>)}</div>
+ <p className="exec-drag-instructions" id={dragHelpId}>Drag the handle to reorder. With the handle focused, use the up and down arrow keys.</p>
+ <Reorder.Group as="div" axis="y" values={availableWidgets} onReorder={reorderWidgets} className="exec-preference-list" aria-label="Overview sections">{availableWidgets.map(key=><DraggableSection key={key} widget={key} checked={!prefs.hidden.includes(key)} onToggle={()=>update({hidden:prefs.hidden.includes(key)?prefs.hidden.filter(k=>k!==key):[...prefs.hidden,key]})} onMove={direction=>moveWidget(key,direction)} descriptionId={dragHelpId}/>)}</Reorder.Group><span className="sr-only" role="status" aria-live="polite">{reorderMessage}</span>
  <fieldset className="exec-kpi-options"><legend>Financial briefing metrics</legend>{kpiNames.map(k=><label key={k}><input type="checkbox" checked={prefs.kpis.includes(k)} disabled={prefs.kpis.length===1&&prefs.kpis.includes(k)} onChange={()=>update({kpis:prefs.kpis.includes(k)?prefs.kpis.filter(x=>x!==k):[...prefs.kpis,k]})}/>{kpiLabels[k]}</label>)}</fieldset>
  <div className="exec-thresholds"><label>Underutilized below (%)<input type="number" min="0" max={prefs.over-1} value={prefs.under} onChange={e=>{const v=Number(e.target.value);if(v>=0&&v<prefs.over)update({under:v});}}/></label><label>Overloaded above (%)<input type="number" min={prefs.under+1} max="200" value={prefs.over} onChange={e=>{const v=Number(e.target.value);if(v>prefs.under&&v<=200)update({over:v});}}/></label><label>Delivery warning window (days)<input type="number" min="1" max="30" value={prefs.deadlineDays} onChange={e=>{const v=Number(e.target.value);if(v>=1&&v<=30)update({deadlineDays:v});}}/></label><label>Minimum progress near deadline (%)<input type="number" min="0" max="100" value={prefs.riskProgress} onChange={e=>{const v=Number(e.target.value);if(v>=0&&v<=100)update({riskProgress:v});}}/></label></div>
  <Button onClick={()=>setPrefs({...defaultPreferences})}><RotateCcw size={14}/>Reset to default layout & filters</Button></DialogContent></Dialog></div>;

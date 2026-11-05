@@ -125,12 +125,12 @@ export function ProjectHealthPanel({ projects }: { projects: BusinessRecord[] })
 }
 
 export function PriorityTaskList({ scopedRecords }: { scopedRecords?: BusinessRecord[] }) {
-  const { records: allRecords, complete, openCreate } = useWorkspace();
+  const { records: allRecords } = useWorkspace();
   const records = scopedRecords ?? allRecords;
   const [filter, setFilter] = useState("Open");
   const tasks = records.filter(record => record.kind === "task" && (filter === "All tasks" || record.status !== "Completed")).slice(0, 4);
-  return <section className="bos-priority-panel"><PanelHeading title="A little focus goes a long way." subtitle="Your priority tasks" action={<select className="bos-task-filter" aria-label="Filter priority tasks" value={filter} onChange={event => setFilter(event.target.value)}><option>Open</option><option>All tasks</option></select>} />
-    <div className="bos-priority-list">{tasks.map(task => <div className={`bos-priority ${task.status === "Completed" ? "completed" : ""}`} key={task.id}><button className="bos-task-check" onClick={() => complete(task.id)} aria-label={`${task.status === "Completed" ? "Reopen" : "Complete"} ${task.title}`} aria-pressed={task.status === "Completed"}>{task.status === "Completed" && <Check size={14} />}</button><div className="bos-task-copy"><strong>{task.title}</strong><span>{task.owner}<i />{new Date(`${task.date}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })}</span></div><StatusBadge status={task.status} /></div>)}{!tasks.length && <div className="bos-panel-empty"><CheckCircle2 size={22} /><p>You’re all caught up.</p><Button variant="ghost" onClick={() => openCreate("task")}>Add your next task <Plus size={14} /></Button></div>}</div>
+  return <section className="bos-priority-panel"><PanelHeading title="A little focus goes a long way." subtitle="Team priority tasks" action={<select className="bos-task-filter" aria-label="Filter priority tasks" value={filter} onChange={event => setFilter(event.target.value)}><option>Open</option><option>All tasks</option></select>} />
+    <div className="bos-priority-list">{tasks.map(task => <div className={`bos-priority ${task.status === "Completed" ? "completed" : ""}`} key={task.id}><span className="bos-task-check" aria-label={task.status}>{task.status === "Completed" && <Check size={14} />}</span><div className="bos-task-copy"><strong>{task.title}</strong><span>{task.owner}<i />{new Date(`${task.date}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })}</span></div><StatusBadge status={task.status} /></div>)}{!tasks.length && <div className="bos-panel-empty"><CheckCircle2 size={22} /><p>No open team priorities.</p></div>}</div>
     <Link className="bos-priority-footer" href="/tasks">View all tasks <ArrowRight size={16} /></Link>
   </section>;
 }

@@ -1,0 +1,21 @@
+"use client";
+import Link from "next/link";
+import {useState} from "react";
+import {ArrowUpRight, Search, Eye, Users} from "lucide-react";
+import type {BusinessRecord} from "@/lib/models";
+import {currentDay} from "./executive-panels";
+import {StatusBadge,Avatar} from "./primitives";
+
+export function WorkOverview({records}:{records:BusinessRecord[]}){
+ const [status,setStatus]=useState("all"),[owner,setOwner]=useState(""),[query,setQuery]=useState("");
+ const today=currentDay(),soon=new Date(Date.parse(today)+7*86400000).toISOString().slice(0,10);
+ const tasks=records.filter(record=>record.kind==="task"),open=tasks.filter(task=>task.status!=="Completed");
+ const overdue=open.filter(task=>task.date<today),blocked=open.filter(task=>task.blocker),due=open.filter(task=>task.date>=today&&task.date<=soon);
+ const owners=[...new Set(tasks.map(task=>task.owner))].sort();
+ const rows=tasks.filter(task=>(!owner||task.owner===owner)&&`${task.title} ${task.owner}`.toLowerCase().includes(query.toLowerCase())&&(status==="all"||status==="open"&&task.status!=="Completed"||status==="overdue"&&task.status!=="Completed"&&task.date<today||status==="blocked"&&task.status!=="Completed"&&task.blocker||status==="done"&&task.status==="Completed")).sort((a,b)=>Number(a.status==="Completed")-Number(b.status==="Completed")||a.date.localeCompare(b.date));
+ return <div className="studio-work-overview"><div className="studio-work-context"><span><Eye size={14}/>Business owner view</span><small>Team work · read only</small></div>
+ <div className="studio-work-metrics">{[["Open tasks",open.length],["Overdue",overdue.length],["Blocked",blocked.length],["Due in 7 days",due.length]].map(([label,value])=><div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>
+ <section className="studio-work-register"><header><div><span className="studio-detail-eyebrow">TEAM DELIVERY</span><h2>Priorities & ownership</h2></div><span>{rows.length} tasks</span></header><div className="studio-work-filters"><label><Search size={15}/><input aria-label="Search team tasks" placeholder="Find a task or person" value={query} onChange={e=>setQuery(e.target.value)}/></label><select aria-label="Work status" value={status} onChange={e=>setStatus(e.target.value)}><option value="all">All tasks</option><option value="open">Open tasks</option><option value="overdue">Overdue</option><option value="blocked">Blocked</option><option value="done">Completed</option></select><select aria-label="Task owner" value={owner} onChange={e=>setOwner(e.target.value)}><option value="">All owners</option>{owners.map(name=><option key={name}>{name}</option>)}</select></div>
+ <div className="studio-work-table"><table><thead><tr><th>Task</th><th>Owner</th><th>Project</th><th>Due date</th><th>Status</th><th><span className="sr-only">View details</span></th></tr></thead><tbody>{rows.map(task=>{const project=records.find(record=>record.id===task.projectId);return <tr key={task.id}><td><Link href={`/tasks/${encodeURIComponent(task.id)}`}>{task.title}</Link>{task.blocker&&task.status!=="Completed"&&<small>Blocked</small>}</td><td><span className="studio-work-person"><Avatar name={task.owner} small/>{task.owner}</span></td><td>{project?<Link href={`/projects/${encodeURIComponent(project.id)}`}>{project.title}</Link>:<span className="studio-work-muted">Not linked</span>}</td><td><span data-overdue={task.status!=="Completed"&&task.date<today}>{task.date}</span></td><td><StatusBadge status={task.status}/></td><td><Link href={`/tasks/${encodeURIComponent(task.id)}`} aria-label={`View ${task.title}`}><ArrowUpRight size={16}/></Link></td></tr>;})}</tbody></table>{!rows.length&&<p className="studio-work-empty">No tasks match these filters.</p>}</div></section>
+ <section className="studio-work-owners"><header><Users size={17}/><h2>Open assignments</h2><span>Task counts by owner</span></header><div>{owners.map(name=>({name,count:open.filter(task=>task.owner===name).length})).filter(person=>person.count>0).map(person=><button key={person.name} aria-pressed={owner===person.name} onClick={()=>setOwner(owner===person.name?"":person.name)}><Avatar name={person.name} small/><span>{person.name}</span><strong>{person.count}</strong></button>)}{!open.length&&<p>No open assignments.</p>}</div></section></div>;
+}

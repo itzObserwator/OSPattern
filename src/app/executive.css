@@ -155,3 +155,11 @@
 .bos-command-grid>.bos-people-column { display:flex; flex-direction:column; align-items:stretch; }
 .bos-command-grid .exec-workforce-compact { display:flex; flex-direction:column; flex:1; height:auto; }
 .bos-command-grid .exec-workforce-compact .exec-utilization { flex:1; display:grid; grid-auto-rows:1fr; }
+
+.exec-drag-instructions { font-size:10px; color:var(--text-muted); line-height:1.6; margin:16px 0 0; }
+.exec-preference-list .exec-draggable-section { position:relative; padding:12px 6px 12px 0; background:var(--surface); border-radius:8px; }
+.exec-draggable-section label { flex:1; min-width:0; line-height:1.5; padding-right:12px; }
+.exec-section-drag-handle { display:grid; place-items:center; width:36px; height:40px; flex-shrink:0; border:1px solid var(--border); background:var(--canvas); border-radius:10px; color:var(--text-muted); cursor:grab; touch-action:none; user-select:none; }
+.exec-section-drag-handle:hover { color:var(--brand-primary); background:var(--brand-soft); }
+.exec-section-drag-handle:active { cursor:grabbing; }
+.exec-section-drag-handle:focus-visible { outline:2px solid var(--brand-primary); outline-offset:3px; }
