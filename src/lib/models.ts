@@ -8,7 +8,7 @@ export const recordSchema = z.object({
   status: z.enum(["On track", "At risk", "Delayed", "Active", "Pending", "Completed", "Paid"]),
   amount: z.number().finite().nonnegative(), progress: z.number().min(0).max(100),
   departmentId: z.string().optional(), clientId: z.string().optional(), projectId: z.string().optional(),
-  employeeId: z.string().optional(), campaignId: z.string().optional(), category: z.string().optional(),
+  employeeId: z.string().optional(), campaignId: z.string().optional(), category: z.string().optional(), salaryAllocation: z.enum(["direct", "indirect"]).optional(),
   contactName: z.string().trim().max(100).optional(),
   contactEmail: z.email().optional(),
   jobTitle: z.string().trim().max(80).optional(),
@@ -21,7 +21,7 @@ export const recordSchema = z.object({
 });
 export type BusinessRecord = z.infer<typeof recordSchema>;
 export const recordListSchema = z.array(recordSchema);
-export const createSchema = recordSchema.pick({ title: true, owner: true, date: true, amount: true, jobTitle: true, contactName: true, contactEmail: true, source: true, followUpDate: true });
+export const createSchema = recordSchema.pick({ title: true, owner: true, date: true, amount: true, jobTitle: true, contactName: true, contactEmail: true, source: true, followUpDate: true, category: true, salaryAllocation: true });
 export type CreateValues = z.infer<typeof createSchema>;
 export type Month = "2026-09" | "2026-10" | "2026-11";
 export const money = (n: number) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);

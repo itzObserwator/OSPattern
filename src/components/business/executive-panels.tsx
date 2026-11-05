@@ -16,11 +16,19 @@ export const currentDay=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Kolk
 export const metric=(v:number|null,percent=false)=>v===null?"Not available":percent?`${v.toFixed(1)}%`:money(v);
 export function ReportHeader({title,description,href}:{title:string;description:string;href?:string}){return <header className="exec-report-header"><div><h2>{title}</h2><p>{description}</p></div>{href&&<Link href={href} aria-label={`Open ${title} report`}><ArrowUpRight size={18}/></Link>}</header>;}
 function Missing({children}:{children:ReactNode}){return <p className="exec-missing">{children}</p>;}
-function CashMiniTrend({values}:{values:number[]}){
+function CashMiniTrend({values,months}:{values:number[];months:string[]}){
+ const [active,setActive]=useState<number|null>(null);
+ const selected=active??values.length-1;
  const min=Math.min(0,...values),max=Math.max(1,...values),spread=max-min;
- const points=values.map((value,index)=>({x:6+index*36,y:78-(value-min)/spread*64}));
- const path=`M${points[0].x},${points[0].y}`+points.slice(1).map((point,index)=>` C${points[index].x+18},${points[index].y} ${point.x-18},${point.y} ${point.x},${point.y}`).join("");
- return <div className="finance-kpi-trend" aria-hidden="true"><svg viewBox="0 0 192 90" preserveAspectRatio="none"><path d={`${path} L186,90 L6,90 Z`} fill="currentColor" opacity=".07"/><path d={path} fill="none" stroke="currentColor" strokeWidth="1.5" vectorEffect="non-scaling-stroke"/></svg><span className="finance-trend-point" style={{left:`${points[5].x/192*100}%`,top:`${points[5].y/90*100}%`}}/></div>;
+ const baseline=max/spread*100;
+ return <div className="finance-kpi-trend finance-mini-bars" role="group" aria-label="Monthly cash trend">
+  <div className="finance-mini-bars-plot"><span className="finance-mini-baseline" style={{top:`${baseline}%`}}/>{values.map((value,index)=>{
+   const top=value>=0?(max-value)/spread*100:baseline;
+   const height=Math.abs(value)/spread*100;
+   const label=new Date(`${months[index]}-01T12:00:00Z`).toLocaleDateString("en-IN",{month:"short",year:"numeric",timeZone:"UTC"});
+   return <button key={months[index]} aria-label={`${label}: ${money(value)}`} data-selected={selected===index} onPointerEnter={()=>setActive(index)} onPointerLeave={()=>setActive(null)} onFocus={()=>setActive(index)} onBlur={()=>setActive(null)}><span className="finance-mini-bar" style={{top:`${top}%`,height:`${Math.max(height,1)}%`}}/>{active===index&&<span className="finance-mini-tooltip">{money(value)}</span>}</button>;
+  })}</div><div className="finance-mini-months" aria-hidden="true">{months.map((month,index)=><span key={month} data-selected={selected===index}>{new Date(`${month}-01T12:00:00Z`).toLocaleDateString("en-IN",{month:"short",timeZone:"UTC"})}</span>)}</div>
+ </div>;
 }
 export function FinancialIntelligence({compact=false}:{compact?:boolean}){
  const {records,data,prefs,period}=useExecutiveScope(); const fin=financialIntelligence(records,data,period,currentDay()); const prior=financialIntelligence(records,data,comparePeriod(period,prefs.comparison),currentDay());
@@ -31,7 +39,7 @@ export function FinancialIntelligence({compact=false}:{compact?:boolean}){
  const selected=compact?prefs.kpis:keys.filter(key=>fin[key]!==null);
  const missing=keys.filter(key=>fin[key]===null);
  return <section className={`exec-report ${compact?"":"finance-focused-report"}`} id="financial-intelligence"><ReportHeader title="Financial intelligence" description={`${period.from} — ${period.to} · INR`} href={compact?"/finance":undefined}/>
- <div className="exec-financial-summary">{selected.map(k=><div key={k} data-cash={["cashIn","cashOut","cashNet"].includes(k)}>{!compact&&<span className="finance-kpi-emblem" aria-hidden="true">{k==="cashIn"?<CashInIcon size={18}/>:k==="cashOut"?<ArrowDownLeft size={18}/>:<Wallet size={18}/>}</span>}<span>{kpiLabels[k]}</span><strong>{metric(fin[k],k==="margin"||k==="budget")}</strong>{["cashIn","cashOut","cashNet"].includes(k)&&<small>{metric(prior[k])} previous period</small>}{!compact&&["cashIn","cashOut","cashNet"].includes(k)&&<CashMiniTrend values={history.map(row=>row[k as keyof typeof row])}/>}</div>)}</div>
+ <div className="exec-financial-summary">{selected.map(k=><div key={k} data-cash={["cashIn","cashOut","cashNet"].includes(k)}>{!compact&&<span className="finance-kpi-emblem" aria-hidden="true">{k==="cashIn"?<CashInIcon size={18}/>:k==="cashOut"?<ArrowDownLeft size={18}/>:<Wallet size={18}/>}</span>}<span>{kpiLabels[k]}</span><strong>{metric(fin[k],k==="margin"||k==="budget")}</strong>{["cashIn","cashOut","cashNet"].includes(k)&&<small>{metric(prior[k])} previous period</small>}{!compact&&["cashIn","cashOut","cashNet"].includes(k)&&<CashMiniTrend values={history.map(row=>row[k as keyof typeof row])} months={trend.map(row=>row.month)}/>}</div>)}</div>
  {compact?<Missing>Accounting profit, balances and budgets require complete linked records. <Link href="/finance">Open the Finance report <ArrowUpRight size={12}/></Link></Missing>:<>
  <div className="exec-report-grid finance-ready-reports">
  {categories.length>0&&<section><h3>Cash expense categories</h3><CategoryChart data={categories} spatial expenses={records.filter(record=>record.kind==="expense"&&record.status==="Paid"&&within(record.date,period))}/></section>}

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowUpRight, Bell, ChevronDown, ChevronsLeft, Command, HelpCircle, Menu, PanelTop, Search, Settings2, Sparkles, X } from "lucide-react";
+import { ArrowUpRight, Bell, ChevronsLeft, Command, HelpCircle, Menu, PanelTop, Search, Settings2, Sparkles, X } from "lucide-react";
 import { modules, navigation } from "@/lib/navigation";
 import { useWorkspace } from "./workspace-provider";
 import { Avatar, StatusBadge } from "./primitives";
@@ -59,7 +59,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <a className="bos-skip" href="#main">Skip to content</a>
     <aside className="bos-sidebar">
       <div className="bos-sidebar-brand"><Brand /><Button variant="ghost" size="icon" className="bos-collapse-control" onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} aria-expanded={!collapsed}><ChevronsLeft size={16} /></Button></div>
-      <Dialog><DialogTrigger asChild><button className="bos-workspace-switcher" aria-label="Studio North workspace controls"><span className="bos-workspace-icon">N<span><ArrowUpRight size={10} /></span></span><span className="bos-workspace-copy"><strong>Studio North</strong><small>Agency workspace</small></span><ChevronDown size={15} /></button></DialogTrigger><DialogContent><DialogTitle>Your workspace</DialogTitle><DialogDescription>Studio North · Techgy Link demo</DialogDescription><p>This preview contains one browser-local workspace. Your sample records are saved on this device.</p><Button asChild><Link href="/settings">Workspace information <ArrowUpRight size={16} /></Link></Button></DialogContent></Dialog>
       <Navigation collapsed={collapsed} />
       <div className="bos-sidebar-bottom"><Link href="/ai-assistant" className="bos-sidebar-ai"><span className="bos-sidebar-ai-mark"><Sparkles size={20} /></span><span><strong>A different perspective.</strong><small>Explore your AI workspace</small></span><ArrowUpRight size={16} /></Link><button className="bos-sidebar-profile" onClick={() => setProfile(true)} aria-label="Open Alex Morgan profile"><Avatar name="Alex Morgan" /><span><strong>Alex Morgan</strong><small>Workspace admin · demo</small></span><Settings2 size={16} /></button></div>
     </aside>
